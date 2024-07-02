@@ -1,0 +1,140 @@
+    Once we've implemented an iterator, the matching emi(reverse iterator) can
+be implemented in a jiffy. Comparable to the tt(std::iterator) a
+tt(std::reverse_iterator) hi(reverse_iterator)
+    exists, that nicely implements the reverse iterator for us once we
+have defined an iterator class. Its constructor merely requires an object of
+the iterator type for which we want to construct a reverse iterator.
+
+    To implement a reverse iterator for tt(StringPtr) we only need to define
+the tt(reverse_iterator) type in its interface. This requires us to specify
+only one line of code, which must be inserted after the interface of the class
+tt(iterator):
+        verb(
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+        )
+    Also, the well known members ti(rbegin) and ti(rend) are added to
+tt(StringPtr)'s interface. Again, they can easily be implemented inline:
+        verbinclude(//RBEGEND examples/stringptr.h)
+    Note the arguments the tt(reverse_iterator) constructors receive: the
+        hi(reverse_iterator: initialized by iterator)
+    em(begin point) of the reversed iterator is obtained by providing
+tt(reverse_iterator)'s constructor with the value returned by the member
+tt(end): the em(endpoint) of the normal iterator range; the em(endpoint) of
+the reversed iterator is obtained by providing tt(reverse_iterator)'s
+constructor with the value returned by the member tt(begin): the em(begin
+point) of the normal iterator range.
+
+    The following small program illustrates the use of tt(StringPtr)'s
+tt(RandomAccessIterator):
+        verbinclude(-a examples/iterators.cc)
+    Although it is thus possible to construct a reverse iterator from a normal
+iterator, the opposite does not hold true: it is not possible to
+initialize a normal iterator from a reverse iterator.
+
+    Assume we would like to process all lines stored in tt(vector<string>
+lines) up to any trailing empty lines (or lines only containing blanks) it
+might contain. How should we proceed? One approach is to start the processing
+from the first line in the vector, continuing until the first of the trailing
+empty lines. However, once we encounter an empty line it does of course not
+have to be the first line of the set of trailing empty lines. In that case,
+we'd better use the following algorithm:
+    itemization(
+    it() First, use
+        verb(
+    rit = find_if(lines.rbegin(), lines.rend(), NonEmpty());
+        )
+    to obtain a tt(reverse_iterator rit) pointing to the last non-empty
+        line.
+    it() Next, use
+        verb(
+    for_each(lines.begin(), --rit, Process());
+            )
+        to process all lines up to the first empty line.
+    )
+    However, we can't mix iterators and reverse iterators when using generic
+algorithms. So how can we initialize the second iterator using the available
+tt(reverse_iterator)? The solution is not very difficult, as an iterator may
+be initialized from a pointer. Although the reverse iterator tt(rit) is not a
+pointer, tt(&*(rit - 1)) or tt(&*--rit) em(is). So we use
+        verb(
+    for_each(lines.begin(), &*--rit, Process());
+        )
+    to process all the lines up to the first of the set of trailing empty
+lines. In general, if tt(rit) is a tt(reverse_iterator) pointing to some
+element and we need an tt(iterator) to point to that element, we may use
+tt(&*rit) to initialize the iterator. Here, the dereference operator is
+applied to reach the element the reverse iterator refers to. Then the address
+operator is applied to obtain its address with which we can initialize the
+iterator.
+
+    When defining a tt(const_reverse_iterator) (e.g., matching a
+tt(const_iterator) class), then the tt(const_iterator's operator*) member
+should be a member returning a non-modifiable value or object. Since a
+tt(const_reverse_iterator) uses the iterator's ttNoCt(operator--) member,
+we're running against a small conceptual conflict. On the one hand, a
+tt(std::input_iterator_tag) is inappropriate, since we must allow decrementing
+the iterator. On the other hand, a tt(std::bidirectional_iterator) is
+inappropriate, since we don't allow modification of the data.
+
+    Iterator tags are primarily conceptual. If tt(const_iterators) and
+tt(const_reverse_iterators) only allow increment operations, then an
+tt(input_iterator_tag) most closely matches the iterator's intended use. Hence
+this tag is used below.
+
+    Furthermore, in line with the nature of a tt(input_iterator_tag) our
+tt(const_iterator) should not offer an ttNoCt(operator--). This, of course,
+causes problems: a reverse iterator must be able to use the iterator's
+ttNoCt(operator--) member. This can easily be solved by stashing the iterator's
+ttNoCt(operator--) in the iterator's private section, and declaring
+tt(std::reverse_iterator<(const_)iterator>) its friend (note that declaring a
+tt((const_)reverse_iterator) that is derived from tt(std::reverse_iterator)
+doesn't solve the issue: it is tt(std::reverse_iterator) that calls the
+iterator's ttNoCt(operator--), not a class that is derived from it).
+
+    There is, however, another issue. After deriving a
+tt(const_reverse_iterator) from tt(const_iterator), and subsequently
+dereferencing a tt(const_reverse_iterator), the compiler generates an error
+message like the following (using tt(Type = int)):
+    verb(
+error: invalid initialization of non-const reference of type
+'std::reverse_iterator<const_iterator>::reference {aka int&}' from an rvalue
+of type 'int' 
+  return *--__tmp;
+    )
+
+    This message is caused by tt(std::reverse_iterator) by default expecting
+that the iterator's tt(operator*) returns a reference to a modifiable
+tt(Type). 
+
+    To control such default expectancies, iterators can use tt(typedefs) to
+fine-tune these expectancies. The following tt(typedefs) are interpreted by
+tt(std::reverse_iterator):
+        hi(ptrdiff_t)
+        verb(
+    pointer         -   the type of the pointer to the data 
+                        (e.g., Type *)
+    const_pointer   -   the type of a pointer to immutable data
+                        (e.g., Type const *)
+    reference       -   the type of a reference to the data
+                        (e.g., Type &)
+    const_reference -   the type of a reference to immmutable data
+                        (e.g., Type const &)
+    difference_type -   the type representing differences between
+                        pointers (by default `ptrdiff_t')
+        )
+
+    The mentioned error can simply be prevented by declaring `tt(typedef int
+const &reference)' in the tt(iterator) class. Alternatively, tt(int const) may
+be specified as the data type for the tt(std::iterator)'s base class.
+
+    To define a tt(iterator, const_iterator, reverse_iterator) and
+tt(const_reverse_iterator) for a class tt(Data) the following framework can be
+used:
+
+verbinclude(-a examples/reverseiterators.cc)
+
+
+
+        
+ 
+

@@ -1,0 +1,22 @@
+The original version of the bf(C++) Annotations was written by Frank Brokken
+and Karel Kubat in Dutch using tt(LaTeX). After some time, Karel rewrote the
+text and converted the guide to a more suitable format and (of course) to
+English in September 1994.
+
+The first version of the guide appeared on the net in October 1994. By then it
+was converted to tt(SGML).
+
+Gradually new chapters were added, and the contents were modified and further
+improved (thanks to countless readers who sent us their comment).
+
+In major version four Frank added new chapters and converted the document from
+SGML to turl(yodl)(https://fbb-git.github.io/yodl/).
+    quote(
+    The bf(C++) Annotations are freely distributable. Be sure to read
+    the url(legal notes)(legal.shtml).
+
+    bf(Reading the annotations beyond this point implies that you are aware of
+    these notes and that you agree with them.)
+    )
+    If you like this document, tell your friends about it. Even better, let us
+know by sending email to url(Frank)(mailto:MYEMAIL).

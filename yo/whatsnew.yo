@@ -1,0 +1,78 @@
+This section is modified when the first or second part of the version number
+changes (and occasionally also for the third field of the version number). At
+a major version upgrade the entries of the previous major version are kept,
+and entries referring to older releases are removed.
+    itemization(
+COMMENT(
+    it() Version 11.0.0 adds a chapter (ref(CONCEPTS)) about concepts,
+        re-introduced into bf(C++) since the C++17 (c++1z) standard. The C++17
+        standard also adds em(fold expressions)to the language: covered in
+        a sub-section of section ref(VARIADIC).
+END)
+    it() In version 10.9.0, since the C++17 standard has by now been
+        implemented by Gnu's tt(g++) compiler, explicit references to that
+        standard were removed. Also, sections covering topics that are no
+        longer supported in C++17 (like tt(ptr_fun) and tt(random_shuffle))
+        were removed. Lambda expressions are now covered in chapter about
+        `Operator Overloading' (chapter ref(OVERLOADING)): lambda expressions
+        are compiled by the compiler using standard syntactic rules, and are
+        not predefined templates, as provided by the STL. The sections about
+        tt(std::system_error) (and friends) were rewritten, and were split
+        into sections introducing their facilities (chapter ref(EXCEPTIONS))
+        and sections describing how classes can be designed that are accepted
+        by tt(system_error) (chapter ref(ADVANCEDTEMPL)). The chapter about
+        the STL (chapter ref(STL)) now contains sections covering the
+        tt(std::(experimental::)filesystem) namespace.
+    it() Version 10.8.0 contains a new section providing an
+        overview of new language features introduced by the C++17 standard,
+        and many typos and suboptimally formulated statements were fixed.
+        Also, coverage of (obsolete) binders, negators and tt(random_shuffle),
+        removed by the C++17 standard, was discontinued. 
+    it() Version 10.7.2 contains a complete rewrite and re-implementation of
+        section ref(OVERLOADBINARY) covering overloading/adding binary
+        operators in classes.
+    it() Version 10.7.0 adds various sections about the upcoming new C++17
+        standard. In addition, the sections about
+        overloading binary operators and adding binary operators to existing
+        classes were rewritten.
+    it() Version 10.6.0 adds a section (Lvalues, rvalues and more) introducing
+        some new terms in addition to the familiar terms `lvalue and rvalue';
+        adds a new section (Standard Exceptions: to use or not to use?) about
+        the distinction between standard and non-standard exceptions;
+        describes how to initialize an array of allocated values/POD objects
+        using tt(new Type[size]()); the section about explicit conversion
+        operators received an overhaul.
+    it() Version 10.5.0 contains a partial rewrite of facilities for
+        specifying time. It includes functions tt(std::localtime,
+        std::gmtime,) and tt(std::put_time) (section ref(TIME)), as well as
+        the full table of format specifiers that are recognized by
+        tt(put_time).
+    it() Version 10.4.0 adds the previously missing section about reference
+        bindings (section ref(REFBIND)). This section is a subsection of
+        section ref(OVERLOADBINARY), covering overloading binary operators,
+        and this latter section, as well as the section covering static
+        polymorphism (section ref(STATICPOLY)) was completely 
+        rewritten. In addition, the appearance of the html-version of the
+        annotations() can now to some extent be fine-tuned by adding CSS
+        elements in the top-level file tt(cplusplus.css).
+    it() Version 10.3.0 contains new sections about expression templates,
+        about at tributes, about shared mutexes, about shared locks, about
+        heterogeneous lookups, about sized deallocation functions, and about
+        moving and swapping streams; reorganizes the section about lambda
+        expressions; and adds additional references to the C++14 standard.
+    it() Version 10.2.0 contains a rewrite of the stl's regular expression
+        classes, introduces the tt(std::placeholders) namespace and 
+        covers the generic tt(bind)-binder. Since C++11 by now is em(de facto)
+        the current bf(C++) standard explicit references to it have been
+        removed. References to C++14 were kept, and some notes about the
+        upcoming C++17 standard were added.
+    it() Version 10.1.0 adds several sections about C++11 regular expression
+        handling, supported since the C++11 standard, but which was overlooked
+        when 10.0.0 was published. Coverage of regular expression handling was
+        moved from the Containers chapter to the chapter covering the Standard
+        Template Library.
+    it() Version 10.0.0 adds a new chapter about multi threading, which is
+        formally supported since the C++11 standard. In addition some minor
+        topics (e.g., tt(std::distance), some new syntax elements) were added
+        to the annotations().
+    )

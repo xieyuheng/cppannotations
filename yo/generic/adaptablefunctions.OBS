@@ -1,0 +1,57 @@
+Within the context of the STL an em(adaptable function) is a function object
+defining
+    itemization(
+    iti(argument_type) as a synonym of the type of its unary function
+operator's argument, and
+    iti(first_argument_type) and ti(second_argument_type) as
+synonyms of the types of its binary function operator's arguments
+    )
+and defining ti(result_type) as the type of the return value of its function
+call operator.
+
+The STL defines ti(pointer_to_unary_function) and
+ti(pointer_to_binary_function) as adaptors accepting pointers to,
+respectively, unary and binary functions, converting them into adaptable
+functions.  
+
+When tt(ptr_fun) is provided with a unary function it uses
+tt(pointer_to_unary_function) to create an em(adaptable unary function) and it
+uses tt(pointer_to_binary_function) when provided with a binary function to
+create an em(adaptable binary function).
+
+Note, however, that these adaptors, as well as tt(ptr_fun) are deprecated in
+the upcoming i(C++17) standard, as their use can easily be replaced by lambda
+expressions.
+
+Here is an example showing the use of tt(ptr_fun), creating an adaptable
+binary function. In tt(main), the word to search for is extracted from the
+standard input stream as well as additional words that are stored in a vector
+of tt(string) objects. If the target word is found the program displays the
+word following the target word in the vector of tt(string) objects. Searching
+is performed case insensitively, for which the tt(POSIX) function
+ti(strcasecmp) is used. Following the use of tt(ptr_fun) an equivalent
+statement using a lambda expression is shown:
+        verbinclude(-a examples/ptrfun.cc)
+
+    The observant reader may have noticed that this is not a very efficient
+program. The function tt(stringcasecmp) defines value type parameters forcing
+the construction of copies of the arguments passed to tt(stringcasecmp) every
+time it is called. But after changing the parameter definitions into
+        verb(
+    inline int stringcasecmp(string const &lhs, string const &rhs)
+        )
+    the compiler generates an error message like:
+        verb(
+In instantiation of 'std::binder2nd<std::pointer_to_binary_function<
+        const std::string&, const std::string&, int> >':
+
+    typename _Operation::result_type std::binder2nd<_Operation>::operator()(
+            typename _Operation::first_argument_type&) const
+cannot be overloaded with:
+    typename _Operation::result_type std::binder2nd<_Operation>::operator()(
+            const typename _Operation::first_argument_type&) const
+    )
+    The second tt(find_if) statement, however, compiles flawlessly after
+changing tt(stringcasecmp's) value parameters into tt(const &) parameters,
+which is an additional reason for preferring the use of the lambda expression
+in this example.

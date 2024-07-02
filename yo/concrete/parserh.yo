@@ -1,0 +1,9 @@
+Several class members called from the grammar are defined as member
+templates. tt(Bisonc++) generates multiple files, among which the file
+defining the parser's class. Functions called from the production rule's
+action blocks are usually member functions of the parser. These member
+functions must be declared and defined. Once tt(bisonc++) has generated the
+header file defining the parser's class, that header file isn't automatically
+rewritten, allowing the programmer to add new members to the parser class
+whenever required. Here is `tt(parser.h)' as used in our little calculator:
+        verbinclude(-a bisonc++/parser/parser.h)

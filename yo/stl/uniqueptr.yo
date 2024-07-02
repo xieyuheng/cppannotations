@@ -1,0 +1,102 @@
+Before using the tt(unique_ptr) class presented in this section the
+tthi(memory) header file must be included.
+
+When pointers are used to access dynamically allocated memory strict
+bookkeeping is required to prevent memory leaks. When a pointer variable
+referring to dynamically allocated memory goes out of scope, the dynamically
+allocated memory becomes inaccessible and the program suffers from a 
+    i(memory leak).
+    Consequently, the programmer has to make sure that the dynamically
+allocated memory is returned to the common pool just before the pointer
+variable goes out of scope.
+
+When a pointer variable points to a dynamically allocated single value or
+object, bookkeeping requirements are greatly simplified when the pointer
+variable is defined as a tt(std::unique_ptr)hi(unique_ptr) object.
+
+Unique_ptrs are em(objects) masquerading as pointers. Since they are objects,
+their destructors are called when they go out of scope.  Their destructors
+automatically delete the dynamically allocated memory to which they
+point. Unique_ptrs (and their cousins shared_ptrs (cf. section ref(SHAREDPTR))
+are also called
+    hi(smart pointer)em(smart pointers)).
+
+    tt(Unique_ptrs) have several special characteristics:
+    itemization(
+    it() when assigning a tt(unique_ptr) to another em(move semantics) is
+used. If move semantics is not available compilation fails. On the other
+hand, if compilation succeeds then the used containers or generic algorithms
+support the use of tt(unique_ptr)s. Here is an example:
+        verb(
+std::unique_ptr<int> up1(new int);
+std::unique_ptr<int> up2(up1);      // compilation error
+        )
+    The second definition fails to compile as tt(unique_ptr)'s copy
+constructor is private (the same holds true for the assignment operator). But
+the tt(unique_ptr) class em(does) offer facilities to initialize and assign
+from em(rvalue references):
+        verb(
+class unique_ptr                        // interface partially shown
+{
+    public:
+        unique_ptr(unique_ptr &&tmp);   // rvalues bind here
+    private:
+        unique_ptr(const unique_ptr &other);
+};
+        )
+    In the next example move semantics is used and so it compiles correctly:
+        verb(
+unique_ptr<int> cp(unique_ptr<int>(new int));
+        )
+
+    it() a tt(unique_ptr) object should only point to memory that was made
+available dynamically, as only dynamically allocated memory can be deleted.
+
+    it() multiple tt(unique_ptr) objects should not be allowed to point to the
+same block of dynamically allocated memory. The tt(unique_ptr)'s interface was
+designed to prevent this from happening. Once a tt(unique_ptr) object goes out
+of scope, it deletes the memory it points to, immediately changing any other
+object also pointing to the allocated memory into a hi(pointer: wild) wild
+pointer.
+
+    it() When a class tt(Derived) is derived from tt(Base), then a newly
+allocated tt(Derived) class object can be assigned to a tt(unique_ptr<Base>),
+without having to define a virtual destructor for tt(Base). The tt(Base *)
+pointer that is returned by the tt(unique_ptr) object can simply be cast
+statically to tt(Derived), and tt(Derived's) destructor is automatically
+called as well, if the tt(unique_ptr) definition is provided with a
+em(deleter) function address. This is illustrated in the next example:
+        verb(
+    class Base
+    { ... };
+    class Derived: public Base
+    {
+        ...
+        public:
+            // assume Derived has a member void process()
+   
+            static void deleter(Base *bp);
+    };
+    void Derived::deleter(Base *bp)
+    {
+        delete static_cast<Derived *>(bp);
+    }
+    int main()
+    {
+        unique_ptr<Base, void (*)(Base *)> bp(new Derived, &Derived::deleter);
+        static_cast<Derived *>(bp.get())->process(); // OK!
+
+    } // here ~Derived is called: no polymorphism required.
+        )
+    )
+    The class tt(unique_ptr) offers several member functions to access the
+pointer itself or to have a tt(unique_ptr) point to another block of
+memory. These member functions (and tt(unique_ptr) constructors) are
+introduced in the next few sections.
+
+tt(Unique_ptr) can also be used with containers and (generic) algorithms. They
+can properly destruct any type of object, as their constructors accept
+customizable deleters. In addition, arrays can be handled by tt(unique_ptrs).
+
+
+

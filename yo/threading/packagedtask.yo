@@ -1,0 +1,208 @@
+The class template hi(packaged_task)tt(std::packaged_task) allows a program to
+`package' a function or functor and pass the package to a thread for further
+processing. The processing thread then calls the packaged function, passing it
+its arguments (if any). After completing the function the tt(packaged_task's)
+future is ready, allowing the program to retrieve the results produced by
+the function. Thus, functions and the results of function calls can be
+transferred between threads.
+
+Before using the class template tt(packaged_task) the tthi(future) header file
+must be included.
+ 
+Before describing the class's interface, let's first look at an example to get
+an idea about how a tt(packaged_task) can be used. Remember that the essence
+of tt(packaged_task) is that part of your program prepares (packages) a task
+for another thread to complete, and that the program at some point needs the
+result of the completed task. 
+
+To clarify what's happening here, let's first look at a real-life
+analogon. Every now and then I make an appointment with my garage to have my
+car serviced. The `package' in this case are the details about my car: its
+make and type determine the kind of actions my garage performs when servicing
+it. My neighbor also has a car, which also needs to be serviced every now and
+then. This also results in a `package' for the garage. At the appropriate time
+me and my neighbor take our cars to the garage (i.e., the packages are passed
+to another thread). The garage services the cars (i.e., calls the functions
+stored in the tt(packaged_tasks) [note that the tasks differ, depending on the
+types of the cars]), and performs some actions that are associated with it
+(e.g., registering that my or my neighbor's car has been serviced, or order
+replacement parts). In the meantime my neighbor and I perform our own
+businesses (the program continues while a separate thread runs as well). But
+by the end of the day we'd like to use our cars again (i.e., get the results
+associated with the tt(packaged_task)). A common result in this example is the
+garage's bill, which we have to pay (the program obtains the
+tt(packaged_task's) results).
+
+Here is a little bf(C++) program illustrating the use of a tt(packaged_task)
+(assuming the required headers and tt(using namespace std) have been
+specified):
+    verbinclude(-ns4 //code examples/packagedtask.cc)
+    itemization(
+    it() Lines 1-3 define the variables used for synchronization;
+    it() Line 4 defines a tt(packaged_task: serviceTask) is initialized with a
+        function (or functor) expecting a tt(string), returning a tt(size_t);
+    it() Lines 6-10 and 12-16 define such functions: tt(volkswagen) and
+        tt(peugeot) represent the tasks to perform when cars of the provided
+        types come in for service; presumably they return the bill.
+    it() Lines 18-30 define the function tt(void garage), defining the actions
+        performed by the garage when cars come in for service. These actions
+        are performed by a separate detached thread, starting in line 34. In a
+        continuous loop it waits until it obtains a lock on the
+        tt(carDetailsMutex) and tt(carDetails) is no longer empty. Then, at
+        line 27, it passes tt(carDetails) to the tt(packaged_task
+        `serviceTask'). By itself this is not identical to calling the
+        tt(packaged_task's) function, but eventually its function will be
+        called. At this point the tt(packaged_task) receives its function's
+        arguments, which it eventually will forward to its configured
+        function. Finally, at line 28 it clears tt(carDetails), thus preparing
+        itself for the next request.
+    it() Lines 32-53 define tt(main):
+        itemization(
+        it() First, at line 34 the anonymous detached thread running
+            tt(garage) is started.
+        )
+        Then the program's main loop starts (lines 36-52):
+        itemization(
+        it() The main thread reads commands from the standard input until an
+            empty or no line is received (lines 38-40).
+        it() By convention the line's first letter starts the car's brand
+            (tt(volkswagen) or tt(peugeot)), and the tt(packaged_task), provided with
+            the right servicing function, is constructed
+            next (line 45).
+        it() Then, at line 48 the results, stored in a tt(future), are
+            retrieved. Although at this point the tt(future) might not be
+            ready, the tt(future) object itself em(is), and it is simply
+            returned as the bill.
+        it() Now we're ready to inform the garage that it can service a car:
+            the garage is notified in line 49.
+        )
+       Anything may happen next: the program may perform any actions,
+        but eventually it requests the results produced by the garage.
+       itemization(
+        it() The main thread obtains the results by calling tt(bill.get())
+            in line 51. If, by this time, the car is still being serviced, the
+            bill isn't ready yet, and tt(bill.get()) blocks until it is, and
+            the bill for servicing a car is shown.
+        )
+    )
+    Now that we've seen an example of a program using a tt(packaged_task),
+let's have a look at its interface. Note that the class tt(packaged_task) is a
+class template: its template type parameter specifies the prototype of a
+function or function object implementing the task performed by the
+tt(packaged_task) object.
+
+Constructors and destructor:
+    itemization(
+    ittq(packaged_task() noexcept)
+       (The default constructor constructs a tt(packaged_task) object which is
+        not associated with a function or shared state;)
+
+    ittq(explicit packaged_task(ReturnType(Args...) &&function))
+       (A tt(packaged_task) is constructed for a function or functor
+        expecting arguments of types tt(Args...), and returning a value of
+        type tt(ReturnType). The tt(packaged_task) class template specifies
+        tt(ReturnType (Args...)) as its template type parameter. The
+        constructed object contains a shared state, and a (move constructed)
+        copy of tt(function).
+
+       Optionally an tt(Allocator) may be specified as second template type
+        parameter, in which case the first two arguments are
+        hi(allocator_arg_t)tt(std::allocator_arg_t, Allocator const
+        &alloc). The type tt(std::allocator_arg_t) is a type introduced to
+        disambiguate constructor selections, and can simply be specified as
+        tt(std::allocator_arg_t()).
+
+        This constructor may throw a tt(std::bad_alloc) exception or
+        exceptions thrown by tt(function's) copy or move constructors)
+
+    ittq(packaged_task(packaged_task &&tmp) noexcept)
+       (The move constructor moves  any existing shared state from tt(tmp) to
+        the newly constructed object, removing the shared state from tt(tmp).)
+
+    ittq(~packaged_task())
+       (The object's shared state (if any) is abandoned)
+    )
+
+Member functions:
+    itemization(
+    ithtq(get_future)(future<ReturnType> get_future())
+       (A tt(std::future) object is returned holding the results of the
+        separately executed thread. When tt(get_future) is incorrectly called
+        a tt(future_error) exception is thrown, containing one of the
+        following values:
+       itemization(
+       itt(future_already_retrieved) if tt(get_future) was already called on a
+            tt(packaged_task) object containing the same shared state as the
+            current object;
+        itt(no_state) if the current object has no shared state.
+       )
+       Note: Any tt(futures) that share the object's shared state may access
+        the result returned by the object's task.)
+
+    ittq(void make_ready_at_thread_exit(Args... args))
+       (Calls tt(void operator()(Args... args)) (see below) when the current
+        thread exits, once all objects of thread storage duration associated
+        with the current thread have been destroyed.)
+
+    ittq(packaged_task &operator=(packaged_task &&tmp))
+       (The move assignment operator first releases the current object's
+        shared state (if available), after which the current object and
+        tt(tmp) are swapped;)
+
+    ittq(void operator()(Args... args))
+       (The tt(args) arguments are forwarded to the current object's
+        stored task. When the stored task returns its return value is stored
+        in the current object's shared state. Otherwise any exception thrown
+        by the task is stored in the object's shared state. Following this the
+        object's shared state is made ready, and any threads blocked in a
+        function waiting for the object's shared state to become ready are
+        unblocked. A tt(future_error) exception is thrown upon error,
+        containing 
+       itemization(
+       itt(promise_already_satisfied) if the shared state has already been
+            made ready;
+        itt(no_state) if the current object does not have any shared state.
+       )
+       Calling this member synchronizes with calling any member function of a
+        tt((shared_)future) object that provides access to the
+        tt(packaged_task's) results.)
+
+    ittq(void reset())
+       (Abandons any available shared state, initializing the current object
+        to tt(packaged_task(std::move(funct))), where tt(funct) is the
+        object's stored task. This member may throw the following exceptions:
+       itemization(
+       itt(bad_alloc) if memory for the new shared state could not be
+            allocated;
+        it() any exception thrown by the move constructor of the task stored in
+                the shared state;   
+        itt(future_error) with a tt(no_state) error condition if the current
+            object contains no shared state.
+       ))
+
+    ittq(void swap(packaged_task &other) noexcept)
+       (The shared states and stored tasks of the current object  and other
+        are swapped.) 
+
+    ittq(bool valid() const noexcept)
+       (Returns tt(true) if the current object contains a shared state,
+        otherwise tt(false) is returned;)
+    )
+
+The following non-member (free) function operating on tt(packaged_task)
+objects is available:
+    itemization(
+    it() tt(void swap+OPENPARpackaged_task<ReturnType(Args...)> &lhs,)
+                                                            linebreak()
+            tt(packaged_task<ReturnType(Args...)> &rhs+CLOSEPAR noexcept)
+       quote(Calls tt(lhs.swap(rhs)))
+    )
+
+COMMENT(
+    template <class R, class Alloc>
+    struct uses_allocator<packaged_task<R>, Alloc>;
+
+    Requires: Alloc shall be an Allocator (17.6.3.5).
+END)
+
+

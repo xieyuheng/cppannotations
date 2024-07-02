@@ -1,0 +1,26 @@
+    hi(partial_sort)
+    itemization(
+        it() Header file: tt(<algorithm>)
+        it() Function prototypes:
+        itemization(
+            itt(void partial_sort(RandomAccessIterator first,
+RandomAccessIterator middle, RandomAccessIterator last);)
+            itt(void partial_sort(RandomAccessIterator first,
+RandomAccessIterator middle, RandomAccessIterator last, Compare comp);)
+        )
+        it() Description:
+            itemization(
+            it() The first prototype: the
+(tt(middle - first)) smallest elements
+are sorted and stored in the range rangett(first, middle) using the
+ti(operator<) of the data type to which the iterators point to compare
+elements. The remaining elements of the series remain unsorted, and are stored
+in the range rangett(middle, last).
+            it() The second prototype: the (tt(middle - first)) smallest
+elements (according to the provided binary predicate tt(comp)) are sorted and
+stored in the range rangett(first, middle). The remaining elements of the
+series remain unsorted.
+            )
+        it() Example:
+        verbinclude(-a examples/partialsort.cc)
+    )

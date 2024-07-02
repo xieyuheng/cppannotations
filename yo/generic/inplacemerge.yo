@@ -1,0 +1,25 @@
+    hi(inplace_merge)
+    itemization(
+        it() Header file: tt(<algorithm>)
+        it() Function prototypes:
+        itemization(
+            itt(void inplace_merge(BidirectionalIterator first,
+                BidirectionalIterator middle, BidirectionalIterator last);)
+            itt(void inplace_merge(BidirectionalIterator first,
+                BidirectionalIterator middle, BidirectionalIterator last,
+                Compare comp);)
+        )
+        it() Description:
+        itemization(
+            it() The first prototype: the two (sorted) ranges rangett(first,
+middle) and rangett(middle, last) are merged, keeping a sorted list (using the
+tt(operator<) of the data type to which the iterators point). The final
+series is stored in the range rangett(first, last).
+            it() The second prototype: the two (sorted) ranges rangett(first,
+middle) and rangett(middle, last) are merged, keeping a sorted list (using the
+boolean result of the binary comparison operator tt(comp)). The final series
+is stored in the range rangett(first, last).
+        )
+        it() Example:
+        verbinclude(-a examples/inplacemerge.cc)
+    )

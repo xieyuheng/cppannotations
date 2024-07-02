@@ -1,0 +1,37 @@
+#!/bin/bash
+
+case "$1" in
+    (prog)
+        cd parser
+        bisonc++ --print-tokens grammar || exit 1
+        cd ../scanner
+        flexc++ lexer || exit 1
+        cd ..
+
+        g++ --std=c++11 -Wall -opoly *.cc */*.cc -lbobcat || exit 1
+        echo "
+ready; run the program as './poly < input'
+"
+    ;;
+    (clean)
+        rm -f poly 
+        cd parser
+        rm -f parse.cc parserbase.h 
+        cd ../scanner
+        rm -f lex.cc scannerbase.h
+        echo "
+done
+"   
+        ;;
+    (*)
+        echo "
+usage: 'build prog' to build the program, 'build clean' to cleanup
+"
+        exit 1
+    ;;
+esac
+    
+exit 1
+
+
+

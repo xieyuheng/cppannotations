@@ -1,0 +1,56 @@
+In bf(C++) multi threading may be implemented at various levels of abstraction. In
+general the highest level of abstraction which is available to implement a
+mult-threaded problem should be used. Not so much because it's often simpler
+than using lower levels of abstraction, but because higher levels of
+abstraction are usually semantically closer to the original problem
+description, resulting in code which is easier to understand and therefore
+easier to maintain.  Also, high-abstraction classes also provide exception
+safety and prevent the occurrence of memory leaks.
+
+bf(C++)'s main tool for creating multi-threaded programs is the class
+tt(std::thread), and some examples of its use have already been shown at the
+beginning of this chapter. 
+
+Characteristics of individual threads can be queried from the
+tt(std::this_thread) namespace. Also, tt(std::this_thread) offers some control
+over the behavior of an individual thread.
+
+To synchronize access to shared data bf(C++) offers em(mutexes) (implemented
+by the class tt(std::mutex)) and em(condition variables) (implemented by the
+class tt(std::condition_variable)).
+
+Members of these classes may throw tt(system_error) objects (cf. section
+ref(SYSTEMERROR)) when encountering a low-level error condition.
+
+
+
+COMMENT(
+
+Thread-local storage isn't the only change to the concurrency support in the
+core language: There's also a brand new multi-threading aware memory model,
+with support for atomic operations.
+
+The New Memory Model and Atomic Operations
+
+Sticking to using locks and condition variables to protect your data, you
+won't need to worry about the memory model. The memory model guarantees to
+protect your data from race conditions-if you use locks correctly. You'll get
+undefined behavior if you don't.
+
+If you're working at a really low-level and providing high-performance library
+facilities, then it's important to know the details -which are too complicated
+to go into here. For now, it's enough to know that C++11 has a set of atomic
+types corresponding to the built-in integer types and void pointers -and a
+template std::atomic<>-which can be used to create an atomic version of a
+simple user-defined type. You can look up the relevant documentation for the
+details.
+
+END)
+
+
+
+
+
+
+
+

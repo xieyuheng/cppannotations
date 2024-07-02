@@ -1,0 +1,97 @@
+So our flight simulator program uses two tt(ErrorCodeEnums): one covering
+errors that are related to the simulator itself, and one covering errors
+related to its on-board calculator. If we're using facilities provided by
+libraries then several more enums might also be available that we could use in
+our simulator. E.g., there could be a data base of airport approach charts,
+defining an tt(ApproachChartError) enum, and the simulator's GPS might come
+with its own tt(GPSError) enum.
+
+Errors can usually be categorized. In our simulator we might recognize user
+input errors, unavailable requests, system failures, etc..
+
+hi(error_condition)em(Error_conditions) allow us to categorize
+tt(ErrorCodeEnums) errors without having to use tt(if)-statements to test for
+specific enum values. Error conditions em(could) be (and often em(are))
+implemented like error categories: an enumeration is defined, which is then
+`upgraded' to a tt(std::error_condition).
+
+The disadvantage of using enumerations across independent developers is that
+enumerations are difficult to apply, combine, and extend: a library might
+define an tt(InputError) condition but another library might do so as well;
+different enums might be available, but how do we prevent those enums from
+using identical values?
+
+Such problems can usually be prevented by avoiding fixed enum values, and
+instead use verbal labels denoting error conditions. So rather than specifying
+        verb(
+    enum class ErrorCondition
+    {
+        InputCond,
+        UnavailCond,
+        SystemCond
+    };
+        )
+    textual labels like tt("InputCond", "UnavailCond",) and tt("SystemCond")
+could be used. Instead of defining a fixed-size tt(ErrorConditionEnum) a
+singleton class tt(ErrorCondition) is used, providing and encapsulating such
+an enumeration, at the same time guaranteeing the uniqueness of error
+conditions which are identified by textual labels.
+
+The class tt(ConditionCategory) implements the requirements imposed by the
+class tt(std::error_condition), tailored to the error conditions managed by
+the class tt(ErrorCondition). Also designed as a singleton,
+tt(ConditionCategory) contains a vector whose elements hold names and
+descriptions of the various error conditions. In addition to the familiar
+members tt(name, message) and tt(equivalent) it offers a member
+tt(addCondition). That latter function is used by tt(ErrorCondition) to add
+new error conditions to the current set. Here is its interface:
+        verbinsert(-s4 //class
+            examples/errcode/conditioncategory/conditioncategory.h)
+
+The members tt(name) and tt(message) have trivial implementations.  The member
+tt(equivalent) receives an tt(error_code) object and an error condition enum
+value (as an tt(int)). The function must return tt(true) if its
+tt(error_code) is associated with the received error condition enum
+value. tt(Equivalent) itself doesn't perform those checks. Rather, it
+retrieves the tt(error_code's error_category) and uses that object's
+tt(equivalent) function to perform the test:
+        verbinsert(-s4 //impl
+            examples/errcode/conditioncategory/equivalent.cc)
+
+Next we look at the class tt(ErrorCondition). It contains a
+tt(ConditionCategory) object (i.e., em(the) tt(ConditionCategory) object), and
+a tt(unsorted_map), mapping condition names to their indices in the
+tt(ConditionCategory's) vector. Other than that it's a rather plain class,
+offering members to retrieve the enum values of the various error conditions,
+and returning conditions' names given their numbers. Error condition enum
+values are simply defined as their indices in the tt(ConditionCategory's)
+vector, statically cast to the enum tt(ErrorCondition::Enum).
+
+tt(Enum) by itself is defined as a mere enumeration name, promoted to an
+tt(ErrorConditionEnum) by the tt(std::is_error_condition_enum) trait class
+specialization (comparable to what the tt(is_error_code_enum) trait class
+accomplished for our enums like tt(CalculatorError)). Here is the
+tt(is_error_condition_enum) trait class specialization, followed by
+tt(ErrorCondition's) class interface:
+    verbinsert(-s4 //trait examples/errcode/errorcondition/errorcondition.h)
+
+    verbinsert(-s4 //class examples/errcode/errorcondition/errorcondition.h)
+
+Error conditions objects themselves are returned by a function
+tt(make_error_condition), expecting an tt(ErrorConditionEnum) value as its
+argument, and internally using an tt(std::error_category) that is associated
+with the various error condition enum values, much like tt(CalculatorCategory)
+was associated with the tt(CalculatorError) enumeration. Since
+tt(ConditionCategory) is a singleton, it can directly pass that singleton
+object to the tt(std::error_condition) object:
+
+    verbinsert(-s4 //make
+            examples/errcode/errorcondition/makeerrrorcondition.cc) 
+
+A demo program illustrating some of the facilities of the tt(error_code,
+error_category, error_condition) and related classes concludes this
+section. The complete implementation of the program is provided in the
+annotations()' source archive in the directory
+tt(yo/advancedtemplates/examples/errocde). 
+
+    verbinsert(-s4 //demo examples/errcode/main.cc)

@@ -1,0 +1,39 @@
+As we've seen in section ref(OVERLOADBINARY) binary operators expecting
+tt(const &) arguments can be implemented using a member implementing the
+operation, only offering the basic exception guarantee.
+This latter function can in turn be implemented using the binary
+assignment member. The following examples illustrated this approach for a
+fictitious class tt(Binary):
+        verbinclude(-a ../overloading/examples/binary4.h)
+
+Eventually, the implementation of binary operators depends on the availability
+of the member implementing the basic binary operation, modifying the object
+calling that member (i.e., tt(void Binary::add(Binary const &)) in the
+example).
+
+Since template functions are not instantiated before they are actually used we
+can call non-existing functions from template functions that are never
+instantiated. If such a template function is never instantiated, nothing
+happens; if it is (accidentally) instantiated, then the compiler generates an
+error message, complaining about the missing function.
+
+This allows us to implement all binary operators, movable and non-movable, as
+templates. In the following subsections we develop the class template
+tt(Binops), prividing binary operators.  A complete implementation of a class
+tt(Derived) illustrating how addition and insertion operators can be added to
+a class is provided in the file
+tt(annotations/yo/concrete/examples/binopclasses.cc) in the annotations()'
+source archive.
+
+
+
+
+
+
+
+
+
+
+
+
+

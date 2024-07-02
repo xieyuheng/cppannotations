@@ -1,0 +1,15 @@
+The tt(std::(experimental::)filesystem) namespace offers its own exception
+type ti(filesystem_error). Its constructors have the following signatures (the
+bracketed parameters are optional):
+        verb(
+    filesystem_error(string const &what, 
+                    [path const &path1, [path const &path2,]] 
+                    error_code ec);
+        )
+    As tt(filesystem) facilities are closely related to standard system
+functions, tt(errc) error code enumeration values can be used to obtain
+tt(error_codes) to pass to tt(filesystem_error), as illustrated by the
+following little demo-program:
+    verbinsert(-s4 //fse examples/filesystemerror.cc)
+
+

@@ -1,0 +1,99 @@
+includefile(containers/container)
+
+sect(Notations used in this chapter)
+includefile(containers/notations)
+
+lsect(PAIR)(The `pair' container)
+includefile(containers/pair)
+
+sect(Allocators)
+includefile(containers/allocator)
+
+sect(Available Containers)
+
+    subsect(The `array' container)
+    includefile(containers/array)
+
+    lsubsect(VECTOR)(The `vector' container)
+    includefile(containers/vector)
+
+    subsect(The `list' container)
+    includefile(containers/list)
+
+    lsubsect(QUEUE)(The `queue' container)
+    includefile(containers/queue)
+
+    lsubsect(PRIQUEUE)(The `priority_queue' container)
+    includefile(containers/priority)
+
+    subsect(The `deque' container)
+    includefile(containers/deque)
+
+    lsubsect(MAP)(The `map' container)
+    includefile(containers/map)
+
+        subsubsect(The `map' constructors)
+        includefile(containers/mapconstructors)
+
+        subsubsect(The `map' operators)
+        includefile(containers/mapoperators)
+
+        subsubsect(The `map' public members)
+        includefile(containers/mapmembers)
+
+        subsubsect(The `map': a simple example)
+        includefile(containers/mapexample)
+
+    lsubsect(MULTIMAP)(The `multimap' container)
+    includefile(containers/multimap)
+
+    lsubsect(SET)(The `set' container)
+    includefile(containers/set)
+
+    lsubsect(MULTISET)(The `multiset' container)
+    includefile(containers/multiset)
+
+    lsubsect(STACK)(The `stack' container)
+    includefile(containers/stack)
+
+    subsect(The `unordered_map' container (`hash table'))
+    includefile(containers/unorderedmap)
+
+        subsubsect(The `unordered_map' constructors)
+        includefile(containers/unorderedmapconstructors)
+
+        lsubsubsect(UMAPMEMBERS)(The `unordered_map' public members)
+        includefile(containers/unorderedmapmembers)
+
+        subsubsect(The `unordered_multimap' container)
+        includefile(containers/unorderedmultimap)
+
+    subsect(The `unordered_set' container)
+    includefile(containers/unorderedset)
+
+        subsubsect(The `unordered_multiset' container)
+        includefile(containers/unorderedmultiset)
+
+    subsect(Heterogeneous lookup)
+    includefile(containers/heterogeneous)
+
+lsect(COMPLEX)(The `complex' container)
+includefile(containers/complex)
+
+lsect(UNIONS)(Unrestricted Unions)
+includefile(containers/unrestricted)
+
+    subsect(Implementing the destructor)
+    includefile(containers/uniondestructor)
+
+    subsect(Embedding an unrestricted union in a surrounding class)
+    includefile(containers/embedding)
+
+    subsect(Destroying an embedded unrestricted union)
+    includefile(containers/destroying)
+
+    subsect(Copy and move constructors)
+    includefile(containers/ccandmove)
+
+    subsect(Assignment)
+    includefile(containers/assignment)

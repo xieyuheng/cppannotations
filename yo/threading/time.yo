@@ -1,0 +1,22 @@
+The bf(C) programming language offered tools like bf(sleep)(3) and
+bf(select)(2) to suspend program execution for a certain amount of time.
+
+In multi threaded programs threads are frequently suspended, albeit usually
+for a very short time interval. E.g., when a thread must access a variable,
+but the variable is currently updated by another thread, then the first thread
+should wait until the second thread has completed the update. Updating a
+variable usually doesn't take much time, but if it may take an unexpectedly
+long time, then the waiting thread may want to be informed about it, so it can
+do something else as long as the second thread hasn't finished updating the
+variable.
+
+tt(Sleep) and tt(select) can be used for wating, but as they were designed in
+an era when multi threading was commonly unavailable, their capabilities are
+limited when used in multi threaded programs. 
+
+The gap is bridged by the STL offering dedicated classes for specifying time,
+which mix well with time-dependent thread members. Threads are the topic of
+the next section (ref(THREADS)). Before that, we'll first have a look at
+facilities for specifying time.
+
+

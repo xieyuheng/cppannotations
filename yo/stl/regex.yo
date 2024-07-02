@@ -1,0 +1,204 @@
+Before using the tt((w)regex) class presented in this section the
+tthi(regex) header file must be included.
+
+The types tt(std::regex)hi(regex) and tt(std::wregex)hi(wregex) define regular
+expression patterns. They define, respectively the types
+tt(basic_regex<char>)hi(basic_regex) and tt(basic_regex<wchar_t>)
+types. Below, the class tt(regex) is used, but in the examples tt(wregex)
+could also have been used.
+
+Regular expression facilities were, to a large extent, implemented through
+templates, using, e.g., the tt(basic_string<char>) type (which is equal to
+tt(std::string)). Likewise, generic types like em(OutputIter) (output
+iterator) and em(BidirConstIter) (bidirectional const iterator) are used with
+several functions. Such functions are function templates. Function templates
+determine the actual types from the arguments that are provided at
+em(call-time).
+
+These are the steps that are commonly taken when using regular expressions:
+    itemization(
+    it() First, a regular expression is defined. This involves
+        defining or modifying a tt(regex) object.
+    it() Then the regular expression is provided with a em(target text), which
+        may result in sections of the target text matching the regular
+        expression. 
+    it() The sections of the target text matching (or not matching) the
+        regular expression are retrieved to be processed elsewhere, or:
+    it() The sections of the target text matching (or not matching) the
+        regular expression are directly modified by existing regular
+        expression facilities, after which the modified target text may be
+        processed elsewhere.
+    )
+
+The way tt(regex) objects handle regular expressions can be configured using a
+tt(bit_or) combined set of tt(std::regex_constants)hi(regex_constants) values,
+defining a tt(regex::flag_type)hi(flag_type) value. These
+tt(regex_constants) are:
+    itemization(
+    ittq(std::regex_constants::awk)
+       (bf(awk)(1)'s (POSIX) regular expression grammar is used to specify
+        regular exressions (e.g., regular expressions are delimited by
+        tt(/)-characters, like tt(/\w+/); for further details and for details
+        of other regular expression grammars the reader should consult the
+        man-pages of the respective programs);)
+
+    ittq(std::regex_constants::basic)
+       (the basic POSIX regular expression grammar is used to specify regular
+        expressions;) 
+
+    ittq(std::regex_constants::collate)
+       (the character range operator (tt(-)) used in character classes defines
+        a locale sensitive range (e.g., tt([a-k]));)
+
+    ithtq(ECMAScript)(std::regex_constants::ECMAScript)
+       (this tt(flag_type) is used by default by tt(regex)
+        constructors. The regular expression uses the Modified i(ECMAScript)
+        regular expression grammar;)
+
+    ittq(std::regex_constants::egrep)
+       (bf(egrep)(1)'s (POSIX) regular expression grammar is used to specify
+        regular expressions. This is the same grammar as used by
+        tt(regex_constants::extended), with the addition of the newline
+        character (tt('\n')) as an alternative for the tt('|')-operator;)
+
+    ittq(std::regex_constants::extended)
+       (the extended POSIX regular expression grammar is used to specify
+        regular expressions;)
+
+    ittq(std::regex_constants::grep)
+       (bf(grep)(1)'s (POSIX) regular expression grammar is used to specify
+        regular expressions. This is the same grammar as used by
+        tt(regex_constants::basic), with the addition of the newline character
+        (tt('\n')) as an alternative for the tt('|')-operator;)
+
+    ithtq(icase)(std::regex_constants::icase)
+       (letter casing in the target string is ignored. E.g., the regular
+        expression tt(A) matches tt(a) and tt(A);)  
+
+    ittq(std::regex_constants::nosubs)
+       (When performing matches, all sub-expressions (tt((expr))) are
+        treated as non-marked (tt(?:expr));)
+
+    ittq(std::regex_constants::optimize)
+       (optimizes the speed of matching regular expressions, at the cost of
+        slowing down the construction of the regular expression somewhat. If
+        the same regular expression object is frequently used then this flag
+        may substantially improve the speed of matching target texts;)
+    )
+
+
+bf(Constructors)
+
+    The default, move and copy constructors are available. Actually, the
+default constructor defines one parameter of type tt(regex::flag_type), for
+which the value tt(regex_constants::ECMAScript) is used by default.
+    itemization(
+    ittq(regex())
+       (the default constructor defines a tt(regex) object not containing a
+        regular expression;)
+
+    ittq(explicit regex(char const *pattern))
+       (defines a tt(regex) object containing the regular expression found at
+        tt(pattern);)
+
+    ittq(regex(char const *pattern, std::size_t count))
+       (defines a tt(regex) object containing the regular expression found at
+        the first tt(count) characters of tt(pattern);)
+
+    ittq(explicit regex(std::string const &pattern))
+       (defines a tt(regex) object containing the regular expression found at
+        tt(pattern). This constructor is defined as a member template,
+        accepting a tt(basic_string)-type argument which may also use
+        non-standard character traits and allocators;)
+
+    ittq(regex(ForwardIterator first, ForwardIterator last))
+       (defines a tt(regex) object containing the regular expression found at
+        the (forward) iterator range rangett(first, last). This constructor is
+        defined as a member template, accepting any forward iterator type
+        (e.g., plain tt(char) pointers) which can be used to define the
+        regular expression's pattern;)
+
+    ittq(regex(std::initializer_list<Char> init))
+       (defines a tt(regex) object containing the regular expression from the
+        characters in the initializer list tt(init).)
+
+Here are some examples:
+        verb(
+    std::regex re("\\w+");      // matches a sequence of alpha-numeric
+                                // and/or underscore characters 
+
+    std::regex re{'\\', 'w', '+'} ;     // idem
+
+    std::regex re(R"(\w+xxx")", 3);     // idem
+        )
+    )
+
+bf(Member functions)
+
+    itemization(
+    ittq(regex &operator=(RHS))
+       (The copy and move assignment operators are available. Otherwise, RHS
+        may be:
+        itemization(
+        it() an NTBS (of type tt(char const *));
+        it() a tt(std::string const &) (or any compatible
+            tt(std::basic_string)); 
+        it() a tt(std::initializer_list<char>);
+        ))
+    
+    ittq(regex &assign(RHS))
+       (This member accepts the same arguments as tt(regex's) constructors,
+        including the (optional) tt(regex_constants) values;)
+
+    ittq(regex::flag_type flag() const)
+       (Returns the tt(regex_constants) flags that are active for the current
+        tt(regex) object. E.g.,
+            verb(
+    int main()
+    {
+        regex re;
+
+        regex::flag_type flags = re.flags();
+    
+        cout <<                                 // displays: 16 0 0
+            (re.flags() & regex_constants::ECMAScript) << ' '  <<
+            (re.flags() & regex_constants::icase) << ' '  <<
+            (re.flags() & regex_constants::awk) << ' '  << '\n';
+    }
+            )
+        )
+    Note that when a combination of tt(flag_type) values is specified at
+        construction-time that only those flags that were specified are
+        set. E.g., when tt(re(regex_constants::icase)) would have been
+        specified the tt(cout) statement would have shown tt(0 1
+        0). It's also possible to specify conflicting combinations of
+        flag-values like tt(regex_constants::awk | regex_constants::grep). The
+        construction of such tt(regex) objects succeeds, but should be
+        avoided.
+
+    ittq(locale_type get_loc() const)
+       (Returns the locale that is associated with the current tt(regex)
+        object;)
+
+    ittq(locale_type imbue(locale_type locale))
+       (Replaces the tt(regex) object's current locale setting with
+        tt(locale), returning the replaced locale;)
+
+    ittq(unsigned mark_count() const)
+       (The number of em(marked sub-expressions)hi(marked sub-expression) in
+        the tt(regex) objext is returned. E.g., 
+            verb(
+    int main()
+    {
+        regex re("(\\w+)([[:alpha:]]+)"); 
+        cout << re.mark_count() << '\n';        // displays: 2
+    }
+            )
+        )
+
+    ittq(void swap(regex &other) noexcept)
+       (Swaps the current tt(regex) object with tt(other). Also available as a
+        free function: tt(void swap(regex &lhs, regex &rhs)), swapping tt(lhs)
+        and tt(rhs).)
+    )
+

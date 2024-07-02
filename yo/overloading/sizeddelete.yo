@@ -1,0 +1,12 @@
+As we've seen classes may overload their tt(operator delete) and tt(operator
+delete[]) members. 
+
+Since the C++14 standard the global tt(void operator delete(void *, size_t
+size)) and tt(void operator delete[](void *, size_t size)) functions can also
+be overloaded.
+
+When a global i(sized deallocation function) is defined, it is automatically
+used instead of the default, non-sized deallocation function. The performance
+of programs may improve if a sized deallocation function is available (cf. 
+lurl(http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3663.html)).
+

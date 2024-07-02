@@ -1,0 +1,153 @@
+In this section the function template hi(async)tt(std::async) is
+covered. tt(Async) is used to start asynchronous tasks, returning values (or
+tt(void)) to the calling thread, which is hard to realize merely using the
+tt(std::thread) class.
+
+Before using the function tt(async) the tthi(future) header file must be
+included. 
+
+When starting a thread using the facilities of the class tt(std::thread) the
+initiating thread at some point commonly calls the thread's tt(join)
+method. At that point the thread must have finished or execution blocks until
+tt(join) returns. While this often is a sensible course of action, it may not
+always be: maybe the function implementing the thread has a return value, or
+it could throw an exception.
+
+In those cases tt(join) cannot be used: if an exception leaves a thread, then
+your program ends. Here is an example:
+    verbinclude(-ns4 //code examples/throwing.cc)
+    In line 3 tt(thrower) throws an exception, leaving the thread. This
+exception is not caught by tt(main)'s try-block (as it is defined in another
+thread). As a consequence, the program terminates.
+
+This scenario doesn't occur when tt(std::async) is used. tt(Async) may start a
+new asynchronous task, and the activating thread may retrieve the return value
+of the function implementing the asynchronous task or any exception leaving
+that function from a tt(std::future) object returned by the tt(async)
+function. Basically, tt(async) is called similarly to the way a thread is
+started using tt(std::thread): it is passed a function and optionally
+arguments which are forwarded to the function.
+
+Although the function implementing the asynchronous task may be passed as
+first argument, tt(async's) first argument may also be a value of the strongly
+typed enumeration hi(deferred)hi(async)hi(launch)tt(std::launch):
+        verb(
+    enum class launch
+    {
+        async,
+        deferred
+    };
+        )
+    When passing tt(launch::async) the asynchronous task immediately starts;
+when passing tt(launch::deferred) the asynchronous task is deferred. When 
+tt(std::launch) is not specified the default value tt(launch::async |
+launch::deferred) is used, giving the implementation freedom of choice, 
+usually resulting in deferring execution of the asynchronous task.
+
+So, here is the first example again, this time using tt(async) to start the
+sub-thread:
+    verbinclude(-ns4 //code examples/async1.cc)
+    Now the threads immediately start, but although the results are
+available around line 13, the thrown exception isn't terminating the
+program. The first thread's return value is made available in line 16, the
+exception thrown by the second thread is simply caught by main's try-block
+(line 19).
+
+The function template tt(async) has several overloaded versions:
+    itemization(
+    it() The basic form expects a function or functor as its first argument,
+returning a tt(std::future) holding the function's return value or  exception
+thrown by the function:
+        verb(
+    template <typename Function, class ...Args>
+    std::future<
+        typename std::result_of< Function(Args ...) >::type
+    > std::async(Function &&fun, Args &&...args);
+        )
+
+    it() Alternatively, the first argument may be the address of a member
+function. In that case the (required) second argument is an object (or a
+pointer to an object) of that member function's class. Any remaining arguments
+are passed to the member function (see also the remarks below).
+
+    it() The first argument may also be a combination (using the tt(bit_or)
+operator) of the enumeration values of the tt(std::launch) enumeration:
+        verb(
+    template <class Function, class ...Args>
+    std::future<typename std::result_of<Function(Args ...)>::type> 
+        std::async(std::launch policy, Function &&fun, Args &&...args);
+        )
+
+    it() If the first argument specifies tt(std::launch) values, the second
+argument may also be the address of a member function.  In that case the
+(required) thirs argument is an object (or a pointer to an object) of that
+member function's class. Any remaining arguments are passed to the member
+function (see also the remarks below).
+    )
+    When calling tt(async) all arguments except for the tt(std::launch)
+argument must be references, pointers or move-constructible objects:
+   itemization(
+   it() When a
+    member function is specified, then the object for which the member
+    function is called must be a named object, an anonymous object, or a
+    pointer to a named object. 
+   it() When a named object is passed to the tt(async) function template then
+    copy construction is used to construct a copy of the argument which is
+    then forwarded to the thread-launcher. 
+   it() When an anonymous object is passed to the tt(async) function template
+    then move construction is used to forward the anonymous object to the
+    thread launcher. 
+   )
+ Once the thread itself starts another move construction is used to construct
+an object for the duration of the thread. When a pointer to an object is
+passed, the sub-thread uses the object referred to by the pointer, and neither
+copy- nor move-construction is required. However, when using a pointer to an
+object the programmer should make sure that the object's lifetime exceeds the
+duration of the thread (note that this is not automatically guaranteed, as the
+asynchronous task may not actually start before the future's tt(get) member is
+called).
+    
+Because of the default tt(std::launch::deferred | std::launch::async) argument
+used by the basic tt(async) call it is likely that the function which is
+passed to tt(async) doesn't immediately start. The tt(launch::deferred) policy
+allows the implementor to defer its execution until the program explicitly
+asks for the function's results. Consider the following program:
+        verbinclude(-ns4 //code examples/async2.cc)
+    Although tt(async) is called in line 9, the program's output may not show
+tt(fun's) output line when it is run.  This is a result of the (default) use
+of tt(lauch::deferred): the system simply defers tt(fun's) execution until
+requested, which doesn't happen. But the tt(future) object that's returned by
+tt(async) has a member tt(wait). Once tt(wait) returns the shred state must be
+available. In other words: tt(fun) must have finished. Here is what happens
+when after line 9 the line tt(ret.wait()) is inserted:
+        verb(
+    First async call starts
+        hello from fun
+    First async call ends
+    Second async call starts
+        hello from fun
+    Second async call ends
+        )
+    Actually, evaluation of tt(fun) can be requested at the point where we
+need its results, maybe even after calling tt(asyncCall), as shown in the next
+example:
+        verbinclude(-ns4 //code examples/async4.cc)
+    Here the tt(ret1) and tt(ret2 std::future) objects are created, but their
+tt(fun) functions aren't evaluated yet. Evaluation occurs at lines 6 and 7,
+resulting in the following output:
+        verb(
+    First async call starts
+    First async call ends
+    Second async call starts
+    Second async call ends
+        hello from fun
+        hello from fun
+        )    
+
+
+The tt(std::async) function template is used to start a thread, making its
+results available to the calling thread. On the other hand, we may only be
+able to em(prepare) (package) a task (a thread), but may have to leave the
+completion of the task to another thread. Scenarios like this are realized
+through objects of the class tt(std::packaged_task), which is the topic of the
+next section.

@@ -1,0 +1,43 @@
+The standard tt(for) repetition statements start with an optional
+initialization clause. The initialization clause allows us to localize
+variables to the scope of the for statements.  Initialization clauses van also
+be used in selection statements.
+
+Consider the situation where an action should be performed if the next line
+read from the standard input stream equals tt(go!). Traditionally, when used
+inside a function, intending to localize the string to contain the
+contents of the next line as much as possible, constructions like the
+following had to be used:
+        verb(
+    void function()
+    {
+        // ... any set of statements
+        {
+            string line;    // localize line
+            if (getline(cin, line))
+                action();
+        }
+        // ... any set of statements
+    }
+        )
+ Since tt(init ;) clauses can also be used for selection statements (tt(if)
+and tt(switch) statements) (note that with selection statements the semicolon
+is part of the initialization clause, which is different from the optional
+tt(init) (no semicolon) clause in tt(for) statements), we can 
+rephrase the above example as follows:
+        verb(
+    void function()
+    {
+        // ... any set of statements
+        if (string line; getline(cin, line))
+            action();
+        // ... any set of statements
+    }
+        )
+    
+    Note that a variable may still also be defined in the actual condition
+clauses.  This is true for both the extended tt(if) and tt(switch)
+statement. However, before using the condition clauses an initialization
+clause may be used to define additional variables (plural, as it may contain a
+comma-separated list of variables, similar to the syntax that's available for
+tt(for)-statements).

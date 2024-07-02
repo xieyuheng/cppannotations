@@ -1,0 +1,136 @@
+Namespaces can be nested. Here is an example:
+        verb(
+    namespace CppAnnotations
+    {
+        int value;
+        namespace Virtual
+        {
+            void *pointer;
+        }
+    }
+        )
+    The variable tt(value) is defined in the tt(CppAnnotations)
+namespace. Within the tt(CppAnnotations) namespace another namespace
+(tt(Virtual)) is nested. Within that latter namespace the variable
+tt(pointer) is defined. To refer to these
+variable the following options are available:
+    itemization(
+    it() The hi(fully qualified name)em(fully qualified names) can be used. A
+        fully qualified name of an entity is a list of all the namespaces that
+        are encountered until reaching the definition of the entity. The
+        namespaces and entity are glued together by the scope resolution
+        operator:
+   verb(
+int main()
+{
+    CppAnnotations::value = 0;
+    CppAnnotations::Virtual::pointer = 0;
+}
+        )
+
+    it() A tt(using namespace CppAnnotations) directive can be provided. Now
+        tt(value) can be used without any prefix, but tt(pointer) must be used
+        with the tt(Virtual::) prefix:
+   verb(
+using namespace CppAnnotations;
+
+int main()
+{
+    value = 0;
+    Virtual::pointer = 0;
+}
+        )
+    it() A tt(using namespace) directive for the full namespace chain can be
+        used. Now tt(value) needs its tt(CppAnnotations) prefix again, but
+        tt(pointer) doesn't require a prefix anymore:
+   verb(
+using namespace CppAnnotations::Virtual;
+
+int main()
+{
+    CppAnnotations::value = 0;
+    pointer = 0;
+}
+        )
+    it() When using two separate tt(using namespace) directives none of the
+        namespace prefixes are required anymore:
+   verb(
+using namespace CppAnnotations;
+using namespace Virtual;
+
+int main()
+{
+    value = 0;
+    pointer = 0;
+}
+        )
+    it() The same can be accomplished (i.e., no namespace prefixes) for
+        specific variables by providing specific tt(using) declarations:
+   verb(
+using CppAnnotations::value;
+using CppAnnotations::Virtual::pointer;
+
+int main()
+{
+    value = 0;
+    pointer = 0;
+}
+        )
+    it() A combination of tt(using namespace) directives and tt(using)
+        declarations can also be used. E.g., a tt(using namespace) directive
+        can be used for the tt(CppAnnotations::Virtual) namespace, and a
+        tt(using) declaration can be used for the tt(CppAnnotations::value)
+        variable:
+   verb(
+using namespace CppAnnotations::Virtual;
+using CppAnnotations::value;
+
+int main()
+{
+    value = 0;
+    pointer = 0;
+}
+        )
+    )
+
+    Following a tt(using namespace) directive all entities of that namespace
+can be used without any further prefix. If a single tt(using namespace)
+directive is used to refer to a nested namespace, then all entities of that
+nested namespace can be used without any further prefix. However, the entities
+defined in the more shallow namespace(s) still need the shallow namespace's
+name(s). Only after providing specific tt(using namespace) directives or
+tt(using) declarations namespace qualifications can be omitted.
+
+    When fully qualified names are preferred but a long name like
+        verb(
+    CppAnnotations::Virtual::pointer
+        )
+    is considered too long, a emi(namespace alias) may be used:
+        verb(
+    namespace CV = CppAnnotations::Virtual;
+        )
+    This defines tt(CV) as an em(alias) for the full name. The
+variable tt(pointer) may now be accessed using:
+        verb(
+    CV::pointer = 0;
+        )
+    A namespace alias can also be used in a tt(using namespace) directive or
+tt(using) declaration:
+        verb(
+    namespace CV = CppAnnotations::Virtual;
+    using namespace CV;
+        )
+
+bf(Nested namespace definitions)
+
+    Starting with the C++17 standard, when nesting namespaces a nested
+namespace can directly be referred to using scope resolution operators. E.g.,
+        verb(
+    namespace Outer::Middle::Inner
+    { 
+        // entities defined/declared here are defined/declared in the Inner
+        // namespace, which is defined in the Middle namespace, which is
+        // defined in the Outer namespace
+    }
+        )
+

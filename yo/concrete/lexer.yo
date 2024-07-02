@@ -1,0 +1,22 @@
+    The function matching the i(regular expression) rules (tt(lex)) is a
+member of the class hi(scanner)tt(Scanner). Since tt(Scanner) is derived from
+tt(ScannerBase), it has access to all of tt(ScannerBase)'s protected members
+that execute the lexical scanner's regular expression matching algorithm.
+
+
+    Looking at the regular expressions themselves, notice that we need rules
+to recognize comment, ti(#include) directives, and all remaining characters.
+This all is fairly standard practice. When an tt(#include) directive is
+sensed, the directive is parsed by the scanner. This too is common
+practice. Our lexical scanner performs the following tasks:
+    itemization(
+    it() As usual, i(preprocessor directive)s are not
+analyzed by a parser, but by the lexical scanner;
+    it() The scanner uses a i(mini scanner) to extract the filename from the
+directive, throwing a exception if this fails;
+    it() If the filename could be extracted, processing switches to the next
+stream, controlling for a maximum nesting depth.
+    it() Once the end of the current file has been reached processing
+automatically returns to the previous file, restoring the previous file name
+an line number. The scanner returns 0 if all files have been processed.
+    )

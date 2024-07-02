@@ -1,0 +1,35 @@
+In bf(C++) hash tables are available as objects of the class ti(unordered_map).
+
+Before using tt(unordered_map) or tt(unordered_multimap) containers the header
+file tthi(unordered_map) must be included.
+
+The tt(unordered_map) class implements an i(associative array) in which the
+elements are stored according to some em(hashing) scheme.  As discussed, the
+map is a sorted data structure. The keys in maps are sorted using the
+ti(operator<) of the key's data type. Generally, this is not the fastest way
+to either store or retrieve data.  The main benefit of sorting is that a
+listing of sorted keys appeals more to humans than an unsorted list.  However,
+a by far faster way to store and retrieve data is to use emi(hashing).
+
+Hashing uses a function (called the emi(hash function)) to compute an
+(unsigned) number from the key, which number is thereupon used as an index in
+the table storing the keys and their values. This number is called the
+ emi(bucket number). Retrieval of a key is as simple as computing the
+ i(hash value) of the provided key, and looking in the table at the computed
+index location: if the key is present, it is stored in the table, at the
+computed bucket location and its value can be returned. If it's not present,
+the key is not currently stored in the container.
+
+em(Collisions) hi(collision) occur when a computed index position is already
+occupied by another element. For these situations the abstract containers have
+solutions available. A simple solution, used by tt(unordered_maps), consists
+of using emi(linear chaining), which uses linked list to store colliding table
+elements.
+
+The term em(unordered_map) is used rather than em(hash) to avoid name
+collisions with hash tables developed before they were added to the language.
+
+Because of the hashing method, the emi(efficiency) of a tt(unordered_map) in
+terms of speed should greatly exceed the efficiency of the tt(map). Comparable
+conclusions may be drawn for the tt(unordered_set), the tt(unordered_multimap)
+and the tt(unordered_multiset).

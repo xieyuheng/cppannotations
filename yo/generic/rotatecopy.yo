@@ -1,0 +1,19 @@
+hi(rotate_copy)
+    itemization(
+        it() Header file: tt(<algorithm>)
+        it() Function prototypes:
+        itemization(
+            itt(OutputIterator rotate_copy(ForwardIterator first,
+ForwardIterator middle, ForwardIterator last, OutputIterator result);)
+        )
+        it() Description:
+        itemization(
+            it() The elements implied by the range rangett(middle, last) and
+then the elements implied by rangett(first, middle) are copied to the
+destination container having range rangett(result, returnvalue), where
+tt(returnvalue) is the iterator returned by the function. The original order
+of the elements in the two subsets is not altered.
+        )
+        it() Example:
+        verbinclude(-a examples/rotatecopy.cc)
+    )

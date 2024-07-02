@@ -1,0 +1,39 @@
+    The tt(class Scanner) is generated once by bi(flexc++). This class has
+access to several members defined by its base class tt(ScannerBase). Some of
+these members have public access rights and can be used by code external to
+the class tt(Scanner). These members are extensively documented in the
+bf(flexc++)(1) man-page, and the reader is referred to this man-page for
+further information.
+
+    Our scanner performs the following tasks:
+    itemization(
+    it() it matches regular expressions, ignoring comment, and writing the
+matched text to the standard output stream;
+    it() it switches to other files, and returns to the previous file once a
+file has completely been processed, ending the lexical scan once the end of
+the first input file has been reached.
+    )
+
+    The tt(#include) statements in the input allow the scanner to distill the
+name of the file where the scanning process must continue. This file name is
+stored in a local variable tt(d_nextSource) and a member tt(stackSource)
+handles the switch to the next source. Nothing else is required. Pushing and
+popping input files is handled by the scanner's members tt(pushStream) and
+tt(popStream), provided by tt(flexc++). tt(Scanner)'s interface, therefore,
+only needs one additional function declaration: tt(switchSource).
+
+    Switching streams is handled as follows: once the scanner has extracted a
+filename from an tt(#include) directive, a switch to another file is realized
+by tt(switchSource).  This member calls tt(pushStream), defined by
+tt(flexc++), to stack the current input stream and to switch to the stream
+whose name is stored in tt(d_nextSource). This also ends the tt(include)
+mini-scanner, so to return the scanner to its default scanning mode
+tt(begin(StartCondition__::INITIAL)) is called. Here is its source:
+        verbinclude(-a lexer/scanner/switchsource.cc)
+    The member tt(pushStream), defined by tt(flexc++), handles all necessary
+checks, throwing an exception if the file could not be opened or if too many
+files are stacked.
+
+    The member performing the lexical scan is defined by tt(flexc++) in
+tt(Scanner::lex), and this member can be called by code to process the tokens
+returned by the scanner.

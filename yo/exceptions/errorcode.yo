@@ -1,0 +1,109 @@
+tt(Error_code) objects are used by tt(error_category) and tt(system_error)
+objects. E.g., some tt(system_error) constructors accept tt(std::error_code)
+hi(error_code) objects.
+
+The main purpose of tt(error_code) objects is to encapsulate 
+em(error values), and associated em(error categories). Often, error values
+become available as values assigned to the global tt(int errno).
+
+The class tt(error_code) declares the following public interface and free
+functions:
+
+bf(Constructors):
+    itemization(
+    ittq(error_code() noexcept)
+       (the default constructor initializes the error code with an error
+        em(value) 0 and a tt(system_category) error category. Error value 0 is
+        normally not considered an error;)
+
+    it() The copy constructor is available;
+
+    ittq(error_code(int ec, error_category const &cat) noexcept)
+       (this constructor initializes the error code with error value tt(ec)
+        (e.g., tt(errno), set by a failing function), and an error
+         em(category) (e.g., tt(&system_category()) or
+         tt(generic_category()));)
+
+    ittq(error_code(ErrorCodeEnum value) noexcept)
+       (this is a member template (cf. section ref(MEMTEMP)), using template
+        header tt(template <class ErrorCodeEnum>). It initializes the object
+        with the return value of tt(make_error_code(value)). In section
+        ref(ERRCODEENUM) defining an tt(ErrorCodeEnum) is covered; )
+    )
+
+bf(Members):
+    itemization(
+    it() The copy assignment operator as well as an assignment operator
+        accepting an tt(ErrorCodeEnum) are available;
+
+    ittq(void assign(int val, error_category const &cat))
+       (assigns new values to the current object's em(value) and
+        em(category) data members;)
+
+    ittq(error_category const &category() const noexcept)
+       (returns a reference to the object's error category;)
+
+    ittq(void clear() noexcept)
+       (after calling this member em(value) is set to 0 and the object's error
+        em(category) set to tt(system_category);)
+
+    ittq(error_condition default_error_condition() const noexcept)
+       (returns tt(category().default_error_condition(value()));)
+
+    ittq(string message() const)
+       (returns tt(category().message(value()));)
+
+    ittq(explicit operator bool() const noexcept)
+       (returns tt(value() != 0);)
+
+    ittq(int value() const noexcept)
+       (returns the object's error value.)
+    )
+
+bf(Free functions):
+    itemization(
+    it() Two tt(error_code) objects can be compared for (in) equality and can
+        be ordered (using tt(operator<));
+
+    ittq(error_code make_error_code(errc value) noexcept)
+       (returns tt(error_code(static_cast<int>(value), generic_category()))
+        (tt(errc: see below));)
+
+    ittq(std::ostream &operator<<(std::ostream & os, error_code const &ec))
+       (executes the following statement:
+    verb(
+return os << ec.category().name() << ':' << ec.value();
+        ))
+    )
+
+The ti(enum class errc)hi(errc) defined in the tt(std) namespace, defines
+symbols whose values are equal to the traditional error code values used by
+bf(C) macros but whose values describe the error conditions in a less cryptic
+way. E.g.,
+        verb(
+    enum class errc 
+    {
+        address_family_not_supported, // EAFNOSUPPORT
+        address_in_use,               // EADDRINUSE
+        address_not_available,        // EADDRNOTAVAIL
+        already_connected,            // EISCONN
+        argument_list_too_long,       // E2BIG
+        argument_out_of_domain,       // EDOM
+        bad_address,                  // EFAULT
+        ...
+    };
+        )
+
+Several other strongly typed enums also exist. E.g., the tt(enum class
+future_errc) (cf. section ref(FUTURE)) defines error symbols that are used in
+the context of multi-threading. Defining your own error code enum is covered
+in section ref(ERRCODEENUM).
+
+
+
+
+
+
+
+
+

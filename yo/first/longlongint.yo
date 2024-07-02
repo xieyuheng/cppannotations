@@ -1,0 +1,2 @@
+bf(C++) also supports the type ti(long long int). On 32 bit systems it has at
+least 64 usable bits.

@@ -1,0 +1,175 @@
+Have a look at the following class interface:
+        verb(
+    template <class T>
+    struct Class
+    {
+        struct Iterator
+        {
+            typedef T type;
+            // ... 
+        };
+    
+        Class(Type t);
+
+        Class(Iterator begin, Iterator end)
+        {}
+    
+        template <class Tp>
+        Class(Tp a, Tp b)
+        {}
+
+        Iterator begin();
+        Iterator end();
+    };
+        )
+    The implementation of the tt(Class) constructor expecting two
+tt(Class::Iterator) arguments would probably be somewhat similar to the
+following: 
+        verb(
+    template <class T>
+    Class<T>::Class(Iterator begin, Iterator end)
+    {
+        while (begin != end)
+            d_data.push_back(*begin++);
+    }
+        )
+    where tt(d_data) is some container storing tt(T) values. A
+tt(Class) object can now constructed from a pair of tt(Class::Iterators):
+        verb(
+    Class<int> source;      
+    ...
+    Class<int> dest{source.begin(), source.end()};
+        )
+    Here, the simple template argument deduction procedure fails to deduce the
+tt(int) template argument. This fails:
+        verb(
+    Class dest{source.begin(), source.end()};
+        )
+    When attempting to instantiate a tt(Class) object by passing it
+tt(Class::Iterators) the compiler cannot directly deduce from the provided
+arguments that a tt(Class<Class::Iterator::type>) is to be used: tt(type)
+isn't directly available. Compare this to tt(Class's) second constructor,
+where
+    verb(
+    Class intObject{12};
+    )
+    allows the compiler to create an imaginary function 
+        verb(
+    template <class Type>
+    Class <Type> imaginary(Type param)
+        )
+    in which case tt(Type) clearly is an tt(int), and so a tt(Class<int>)
+object is constructed.
+    
+    When we try to do this for tt(Class(Iterator, Iterator)) we get
+        verb(
+    template <class Iterator>
+    Class<???> f(Iterator, Iterator);
+        )
+    and here tt(Class's) template argument isn't directly related to
+tt(Iterator): the compiler cannot deduce its type and consequently compilation
+fails. 
+
+A similar argument applies to the third constructor, which receives two tt(Tp)
+arguments, which are independent from tt(Class's) template type. 
+
+In cases like these simple type template argument deduction fails. Still, not
+everything is lost: emi(explicit conversions), defined as em(explicitly
+specified) emi(deduction rules) which are added to (beyond) the class's
+interface can be used.
+
+An explicitly specified deduction rule relates a class template constructor
+signature to a class template type. It specifies the template arguments for
+the class template object that is constructed using the constructor whose
+signature is specified. The generic syntactical form of an explicitly
+specified deduction rule looks like this:
+        verb(
+    class template constructor signature -> resulting class type ;
+        )
+    
+Let's apply this to tt(Class(Iter begin, Iter end)). Its signature is
+        verb(
+    template <class Iter>
+    Class(Iter begin, Iter end)
+        )
+    Requiring that tt(Iter) defines a typename tt(type), we can now formulate
+a resulting class type:
+        verb(
+    Class<typename Iter::type>
+        )
+    Now combine both in an explicitly specified deduction rule (which is added
+as a separately line following  tt(Class's) interface):
+        verb(
+    template <class Iter>
+    Class(Iter begin, Iter end) -> Class<typename Iter::type>
+        )
+    
+    After adding this deduction rule to tt(Class's) interface the following
+constructor calls successfully compile:
+        verb(
+    Class src{12};      // already OK
+
+    Class dest1{src.begin(), src.end()};
+                        // begin() and end() return Class<int>::Iterator
+                        // objects. Typename Class<int>::Iterator::type
+                        // is defined as int, so Class<int> dest1 is
+                        // defined.
+
+    struct Double       // used at the next construction
+    {
+        typedef double type;
+        // ... members ...
+    };
+
+    Class dest2{Double{}, Double{}};
+                        // Here the struct Double defines 
+                        // typename double type, so
+                        // Class<double> dest2 is defined.
+        )
+
+
+em(Within) classes the compiler uses (as before) the class itself when merely
+referring to the class name: when referring to tt(Class) in the class
+tt(Class), the compiler considers tt(Class) to be tt(Class<T>). So the headers
+of the declaration and definition of tt(Class's) copy constructor look like
+this:
+        verb(
+    Class(Class const &other);      // declaration
+
+    template <class T>              // definition
+    Class<T>::Class(Class const &other)
+    { /* ... */ }
+        )
+
+Sometimes the default type is not what you want, in which case the required
+type must explicitly be specified. Consider what happens if add a
+member tt(dup) to tt(Class):
+    verb(
+    template <typename T>
+    template <typename Tp>
+    auto Class<T>::dup(Tp a, Tp b)
+    {
+        return Class{ a, b };       // probably not what you want
+    }                               // (see the following text)
+        )
+    Here, because we're inside tt(Class) the compiler deduces that
+tt(Class<T>) must be returned. But in the previous section we decided that,
+when initializing tt(Class) from iterators, tt(Class<typename Tp::type>)
+should be constructed and returned. To accomplish that, the required type is
+explicitly specified:
+    verb(
+    template <typename T>
+    template <typename Tp>
+    auto Class<T>::dup(Tp a, Tp b)
+    {                               // OK: explicitly specified Class tyoe.
+        return Class<typename Tp::type>{ a, b };
+    }                             
+        )
+
+As shown in this example, simple (implicit) or explicit deduction rules do not
+em(have) to be used: they em(can) be used in many standard situations where
+explicitly specifying the class's template arguments appears to be
+superfluous. Template argument deduction was added to the language to simplify
+object construction when using class templates. But in the end you don't
+em(have) to use these deduction rules: it's always still possible to
+explicitly specify template arguments.

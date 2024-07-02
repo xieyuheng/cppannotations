@@ -1,0 +1,141 @@
+The class tt(std::)ti(error_category) serves as a base class for types that
+identify the source and encoding of a particular categories of error codes.
+
+Before using tt(error_category) the tthi(system_error) header file must be
+included.
+
+Earlier, in section ref(SYSTEMERROR), the class tt(error_category) was
+used. Error category classes are defined as em(Singletons), hi(Singleton)
+(cf. em(Singleton Design Pattern)
+    hi(design patterns) (cf. em(Gamma et al.) (1995)
+    hi(Gamma, E.) i(Design Patterns), Addison-Wesley)), and several types of
+error categories are available in the tt(std) namespace: tt(generic_category,
+system_category, iostream_category) and tt(future_category). 
+
+To design your own tt(error_category) class, it should be derived from
+tt(std::error_category), it should be a singleton, and it should merely
+support its own set of errors (extending those that are already available in
+bf(C++)), and the behavior of such a derived class should not differ from the
+be behavior of the tt(error_category) class itself, and it should not alter
+ti(errno)'s value, or any other error state provided by other libraries.
+
+The equality of tt(error_category) objects is deduced from their addresses:
+because of the singleton characteristics, equal addresses mean equal error
+categories.
+
+    The tt(error_category's) public interface does not provide a public
+constructor. Likewise, copying an existing tt(error_category) object is
+suppressed as the copy constructor and overloaded assignment operators are
+declared as `deleted'. Here is tt(error_category)'s non-private class
+interface:
+        verb(
+    class error_category 
+    {
+        public:
+            error_category(error_category const &) = delete;
+            virtual ~error_category() noexcept;
+
+            error_category &operator=(error_category const &) = delete;
+
+            virtual char const *name() const noexcept = 0;
+            virtual string message(int ev) const = 0;
+
+            virtual error_condition default_error_condition(
+                                        int ev
+                                    ) const noexcept;
+
+            virtual bool equivalent(int code, 
+                            error_condition const &condition
+                         ) const noexcept;
+
+            virtual bool equivalent(
+                            error_code const &code, int condition
+                         ) const noexcept;
+
+            bool operator==(error_category const &rhs) const noexcept;
+            bool operator!=(error_category const &rhs) const noexcept;
+            bool operator<(error_category const &rhs) const noexcept;
+
+        protected:
+            error_category() noexcept;
+    };
+    error_category const &generic_category() noexcept;
+    error_category const &system_category() noexcept;
+    error_category const &iostream_category() noexcept;
+    error_category const &future_category() noexcept;
+        )
+
+    In section ref(ERRCODEENUM) the class tt(error_category) is used to define
+a new category: tt(CalculatorErrCategory), as well as a matching function
+        verb(
+    error_category const &calculator_category() const noexcept;
+        )
+
+    At the very least a class that's derived from tt(error_category) must
+override the tt(name) and tt(message) members. In addition, only the
+tt(..._category()) functions will be given access to the single existing
+object of its category, returning a const reference to it.
+
+    The details of the members of this class are:
+    itemization(
+    ithtq(name)(char const *name() const noexcept) 
+       (returns the mere name of the error category (e.g., tt("generic") is
+        returned by tt(generic_category));)
+
+    ithtq(message)(string message(int ev) const)
+       (returns a string describing the error condition matching error value
+        tt(ev);)
+
+
+
+If the error codes for your error category can be mapped to one of the
+        std::errc error codes then default_error_condition should do that
+        mapping, and return a std::error_condition with a category of
+        std::generic_category() and a value of the corresponding std::errc
+        enum value. Otherwise it should return an error_condition referring to
+        that category. 
+
+
+    ithtq(default_error_condition)
+        (error_condition default_error_condition(int ev) const noexcept)
+       (returns an object of type
+        tt(error_condition) corresponding to tt(ev). Derived classes
+        should make sure that error codes matching POSIX tt(errno) values are
+        returned as tt(generic_category) values;)
+    ithtq(equivalent)
+        (bool equivalent(int code, error_condition const &condition) const
+        noexcept)
+       (returns tt(default_error_condition(code) == condition) (tt(true) if,
+        for the category of error represented by tt(*this), tt(code) is
+        considered equivalent to tt(condition); otherwise tt(false));)
+    ittq(bool equivalent(error_code const &code, int condition) const noexcept)
+       (returns tt(*this == code.category() && code.value() == condition)
+        (tt(true) if, for the category of error represented by tt(*this),
+        tt(code) is considered equivalent to tt(condition); otherwise
+        tt(false));)
+    ittq(bool operator<(error_category const &rhs) const noexcept)
+      (returns tt(less<const error_category*>()(this, &rhs)).)
+    )
+
+    Free functions:
+    itemization(
+    ithtq(generic_category)(error_category const &generic_category() noexcept)
+       (returns a reference to the (note: a singleton, so there's only one
+        object) em(generic) tt(error_category) object. This function therefore
+        returns the same object when repeatedly called.  The returned object's
+        tt(name) member returns a pointer to the string tt("generic");)
+    ithtq(system_category)(error_category const &system_category() noexcept)
+       (returns a reference to the em(operating system) tt(error_category)
+        object: it is used for errors reported by the operating system. The
+        object's tt(name) member returns a pointer to the string
+        tt("system"). If the argument tt(ev) of the function
+        tt(error_condition)
+
+
+corresponds to a POSIX tt(errno)
+        value `tt(posv)', then the object's tt(default_error_condition) member
+        should return tt(error-condition(posv,
+        generic_category())). Otherwise, tt(error_condition(ev,
+        system_category())) shall be returned.)
+    )
+

@@ -1,0 +1,54 @@
+In section ref(IOFORMAT) the function tt(std::put_time)hi(put_time) was briefly
+introduced. In this section we take a closer look at tt(std::put_time) and
+related functions.
+
+    figure(threading/time)(Time according to bf(C++))(TIMEIMG)
+
+Figure ref(TIMEIMG) illustrates how the various aspects of time are handled by
+bf(C++). Starting point is a tt(time_point), as obtained from, e.g., the
+tt(system_clock::now) function. A tt(time_point) object's address can be
+passed to the function tt(to_time_t), returning a tt(std::time_t).
+
+Two functions are available for processing tt(std::time_t) values:
+    itemization(
+    ithtq(localtime)(std::tm *std::localtime(std::time_t const *time))
+        (This function returns a pointer to a tt(std::tm)hi(tm) object holding
+the data that are used to display elements of the local time;)
+    ithtq(gmtime)(std::tm *std::gmtime(std::time_t const *time))
+        (This function returns a pointer to a tt(std::tm) object holding the
+data that are used to display i(UTC) (emi(universal time coordinated))
+elements;)
+    )
+    Note that the tt(std::tm) object to which the pointers returned by
+tt(localtime) and tt(gmtime) point is a single static object. Calling these
+functions from multiple threads should be protected by a tt(std::mutex).
+
+Actually displaying these time elements is left to the function 
+    hi(put_time)tt(Type std::put_time(std::tm const *time, char const *fmt)),
+which is declared in the header tthi(iomanip). The following steps result in a 
+tt(std::tm)hi(tm: time struct) object whose address can be passed to
+tt(put_time): 
+    itemization(
+    it() A tt(chrono::time_point) object is obtained. E.g., the static
+function tt(chrono::time_point<system_clock>::now()) returns the current local
+time. This tt(time_point) object may be modified by adding or subtracting
+durations (using, e.g., tt(chrono::seconds) objects);
+    it() The static tt(system_clock::to_time_t) function expects a
+tt(chrono::time_point) and returns a tt(std::time_t) value;
+    it() The functions tt(localtime) or tt(gmtime) receive the address of the
+tt(time_t) value; their return value is a tt(std::tm *) which can directly be
+passed to tt(put_time).
+    )
+    The value that is returned by tt(std::put_time) is unspecified, but it is
+guaranteed to be insertable into tt(std::ostream) objects. The tt(char const
+*fmt) format string can contain text, as well as format specifiers selecting
+elements of the time to be displayed. All of tt(put_time's) format specifiers
+are covered in the tables shown in the next section.
+
+In the following example tt(using namespace std) is declared, but
+tt(using namespace chrono) isn't, to make explicit which elements are inside
+the namespace tt(chrono). In practice tt(using namespace chrono) will often be
+declared immediately after tt(using namespace std). 
+
+    verbinclude(-a examples/timepoint.cc)
+

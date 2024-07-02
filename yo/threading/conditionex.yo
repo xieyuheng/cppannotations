@@ -1,0 +1,106 @@
+Condition variables are used to synchronize threads on the values of data,
+rather than on the mere access to data (for which plain mutex-objects can be
+used). Using condition variables, a thread simply sleeps until it is notified
+by another thread. In a producer-consumer type of program this is usually
+accomplished like this:
+        verb(
+    consumer loop:
+        - wait until there's an item in store,
+            then reduce the number of stored items
+        - remove the item from the store
+        - increment the number of available storage locations
+        - do something with the retrieved item
+
+    producer loop:
+        - produce the next item
+        - wait until there's room to store the item,
+            then reduce the number of available storage locations
+        - store the item
+        - increment the number of stored items
+    )
+
+It is important that the two storage administrative tasks (registering the
+number of available items and available storage locations) are either
+performed by the client or by the producer. For the consumer `waiting' means:
+    itemization(
+    it() Get a lock on the variable containing the actual count
+    it() As long as the count is zero: wait, releasing the lock until another
+        thread has increased the count, then re-acquire the lock.
+    it() Reduce the count
+    it() Release the lock.
+    )
+    This scheme is implemented in a class ti(Semaphore), offering members
+tt(wait) and tt(notify_all). For a more extensive discussion of semaphores see
+em(i(Tanenbaum, A.S.) and i(Austin, T.)) (2013)
+    i(Structured Computer Organization), Pearson Prentice-Hall.
+
+The data member containing the actual count is called tt(d_available). It is
+protected by tt(mutex d_mutex).  In addition a tt(condition_variable
+d_condition) is defined:
+        verbinclude(-s4 //data examples/events.cc)
+
+The waiting process is implemented through its member function tt(wait):
+        verbinclude(-nNs4 //wait examples/events.cc)
+    In line 5 tt(d_condition.wait) releases the lock. It waits until receiving
+a notification, and re-acquires the lock just before returning. Consequently,
+tt(wait's) code always has complete and unique control over tt(d_available).
+
+    What about notifying the a waiting thread? This is handled in lines 4 and
+5 of the  member function tt(notify_all):
+        verbinclude(-nNs4 //notify_all examples/events.cc)
+    At line 4 tt(d_available) is always incremented; by using a postfix
+increment it can simultaneously be tested for being zero. If it was initially
+zero then tt(d_available) is now one. A thread waiting until tt(d_available)
+exceeds zero may now continue. A waiting thread is notified by calling
+tt(d_condition.notify_one). In situations where multiple threads are waiting
+`ti(notify_all)' can also be used.
+
+    Using the facilities of the class tt(Semaphore) whose constructor expects
+an initial value of its tt(semaphore) data member, the classic
+consumer-producer paradigm can now be implemented using
+multi-threading+footnote(A more elaborate example of the producer-consumer
+program is found in the tt(yo/threading/examples/events.cc) file in the
+bf(C++) Annotations's source archive):
+        verb(
+    Semaphore available(10);
+    Semaphore filled(0);
+    std::queue itemQueue;
+
+    void consumer()
+    {
+        while (true)
+        {
+            filled.wait();
+                // mutex lock the queue with multiple consumers
+            size_t item = itemQueue.front();
+            itemQueue.pop();
+            available.notify_all();
+            process(item);      // not implemented here
+        }
+    }
+
+    void producer()
+    {
+        size_t item = 0;
+        while (true)
+        {
+            ++item;
+            available.wait();
+                // mutex lock the queue with multiple consumers
+            itemQueue.push(item);
+            filled.notify_all();
+        }
+    }
+    int main()
+    {
+        thread consume(consumer);
+        thread produce(producer);
+
+        consume.join();
+        produce.join();
+    }
+        )
+
+
+
+

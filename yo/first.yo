@@ -1,0 +1,109 @@
+includefile(first/first)
+
+sect(Notable differences with C)
+includefile(first/extensions)
+
+    lsubsect(ConstRule)(Using the keyword `const')
+    includefile(first/const)
+
+    lsubsect(INTRONAME)(Namespaces)
+    includefile(first/namespaces)
+
+    subsect(The scope resolution operator ::)
+    includefile(first/scope)
+
+    lsubsect(CoutCinCerr)(`cout', `cin', and `cerr')
+    includefile(first/cout)
+
+lsect(FunctionsInStructs)(Functions as part of structs)
+includefile(first/structs)
+
+    lsubsect(HIDING)(Data hiding: public, private and class)
+    includefile(first/public)
+
+    subsect(Structs in C vs. structs in C++)
+    includefile(first/cvscpp)
+
+sect(Several additions to C's grammar)
+
+    subsect(References)
+    includefile(first/references)
+
+    lsubsect(RREF)(Rvalue References)
+    includefile(first/rvalueref)
+
+    subsect(Lvalues, rvalues and more)
+    includefile(first/lvalues)
+
+    subsect(Strongly typed enumerations)
+    includefile(first/stronglytyped)
+
+    subsect(Initializer lists)
+    includefile(first/initializer)
+
+    lsubsect(AUTO)(Type inference using `auto')
+    includefile(first/auto)
+
+        subsubsect(Structured binding declarations)
+        includefile(first/binding)
+
+    subsect(Defining types and `using' declarations)
+    includefile(first/using)
+
+    subsect(Range-based for-loops)
+    includefile(first/rangebased)
+
+    subsect(Raw String Literals)
+    includefile(first/rawstring)
+
+    subsect(Binary constants)
+    includefile(first/binary)
+
+    subsect(Selection statements with initializers)
+    includefile(first/selectinit)
+
+    subsect(Attributes)
+    includefile(first/attributes)
+
+sect(New language-defined data types)
+includefile(first/datatypes)
+
+    lsubsect(BOOL)(The data type `bool')
+    includefile(first/bool)
+
+    lsubsect(WCHAR)(The data type `wchar_t')
+    includefile(first/wchar)
+
+    lsubsect(UNICODE)(Unicode encoding)
+    includefile(first/unicode)
+
+    subsect(The data type `long long int')
+    includefile(first/longlongint)
+
+    subsect(The data type `size_t')
+    includefile(first/sizet)
+
+    subsect(Digit separators)
+    includefile(first/separators)
+
+lsect(CPPCASTS)(A new syntax for casts)
+includefile(first/cast)
+
+    subsect(The `static_cast'-operator)
+    includefile(first/staticcast)
+
+    subsect(The `const_cast'-operator)
+    includefile(first/constcast)
+
+    subsect(The `reinterpret_cast'-operator)
+    includefile(first/reinterpretcast)
+
+    subsect(The `dynamic_cast'-operator)
+    includefile(first/dynamiccast)
+
+    subsect(Casting 'shared_ptr' objects)
+    includefile(first/sharedcast)
+
+
+sect(Keywords and reserved names in C++)
+includefile(first/keywords)

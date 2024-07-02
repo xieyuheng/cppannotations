@@ -1,0 +1,61 @@
+COMMENT(see examples/vector*.cc, exprtempl.*)
+
+Assume we are processing tt(std::vector) objects. Vectors may be assigned to
+each other, but that's about it. We've seen (cf. section ref(VECTOR)) that its
+member functions tend to operate on the current vector, but arithmetic
+operations like addition, subtraction, multiplication and the like cannot
+be applied to pairs of vectors.
+
+Furtunately implementing, e.g., the addition operator for vectors is not
+particularly difficult. If tt(VecType) is our vector type, then implementing
+free functions like
+    tt(VecType &&operator+(VecType const &lhs, VecType const &rhs)) and 
+    tt(VecType &&operator+(VecType &&lhs, VecType const &rhs)) 
+        performing the additions is a simple exercise (cf. chapter
+ref(OVERLOADING)).
+
+Now consider an expression like tt(one + two + three + four). It takes four
+steps to compute this sum: first, tt(tmp = one) is computed, creating the
+eventual return value. The vector tt(tmp) is an (in practice anonymous)
+temporary variable. Then tt(tmp += two) is computed, followed by tt(tmp +=
+three), and finally by tt(tmp += four), obtaining the final result (of course
+we shouldn't implement tt(std::vector::operator+=) as the std namespace is
+off-limits to us, and we shouldn't derive a class from tt(std::vector)
+offering tt(operator+=) according to Liskov's Substitution Principle
+(cf. section ref(INHERITWHY)), but we could get around that, 
+    COMMENT(by deriving a class offering operator+= in an anonymous namespace
+        and performing downcasts to the base class vectorthere.) 
+    and here we simply assume tt(operator+=) is available).
+
+Here's how we might implement tt(operator+=) for tt(VecType):
+        verb(
+    VecType &VecType::operator+=(VecType const &rhs)
+    {
+        for (size_t idx = 0, end = size(); idx != end; ++idx)
+            (*this)[idx] += rhs[idx];
+        return *this;
+    }
+        )
+    Consider this implementation: once we add a tt(VecType) object and such
+objects have tt(n) elements then we have to perform tt(2 * n) index
+evaluations. When adding tt(k VecType) objects this sums up to about tt(2 * k
+* n) index expression evaluations: a lot of evaluations if we're adding many
+and/or big vectors.
+
+    If instead we could manage to perform the evaluations `row by row', each
+vector element would be accessed only once. This would dramatically cut down
+on our index evaluations. We would only need to perform approx. tt(n * k)
+index expression evaluations.
+
+    Expression templates 
+    hi(expression template)hi(template: expression template) 
+    allow us to achieve precisely this kind of optimization. We'll have a look
+at their design and implementation in the coming sections.
+    
+    
+    
+
+
+
+
+

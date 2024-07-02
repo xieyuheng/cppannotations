@@ -1,0 +1,73 @@
+Thread execution may have to be suspended until a specific point in time, for
+a specific amount of time, or until some event has occurred. When specifying
+time an appropriate time unit must be selected. Factors that can be used in
+combination with time units are defined in the class template 
+    hi(ratio template)tt(std::ratio). 
+    The time units themselves are defined in the namespace tt(chrono).
+
+Before the class tt(ratio) can be used, the tthi(ratio) header file must be
+included. Usually just the tthi(chrono) header file is included, as tt(chrono)
+includes tt(ratio), and facilities for specifying time are available after
+including the tt(chrono) header file.
+
+The class template tt(ratio) expects two integral template arguments,
+defining, respectively, the numerator (amount) and denominator (fraction) of
+an amount. By default the denominator equals 1, resulting in the tt(ratio's)
+first argument (the numerator) being interpreted as the represented amount.
+Examples:
+        verb(
+    ratio<1>        - representing one; 
+    ratio<60>       - representing 60
+    ratio<1, 1000>  - representing 1/1000.
+        )
+
+The class template tt(ratio) defines two directly accessible static data
+fields: tt(num)hi(ratio: num) represents its numerator, tt(den)hi(ratio: den)
+its denominator. A tt(ratio) definition by itself simply defines a certain
+amount. E.g., when executing the following program
+        verb(
+    #include <ratio>
+    #include <iostream>
+    using namespace std;
+    int main()
+    {
+        cout << ratio<5, 1000>::num << ',' << ratio<5, 1000>::den << '\n';
+    }
+        )
+    the text 1,200 is displayed, as that's the `amount' represented by
+tt(ratio<5, 1000>): tt(ratio) simplifies the fraction whenever possible.
+
+A fairly large number of predefined tt(ratio) types exist. They can be used
+instead of the more cumbersome tt(ratio<x>) or tt(ratio<x, y>) specification:
+    center(
+    table(8)(llcllcll)(
+    rowline()
+    row(cell(i(yocto))  cell(10+sups(-24)) cellq()
+                     cell(i(zepto))  cell(10+sups(-21)) cellq() cells(2)())
+    rowline()
+    row(cell(i(atto))  cell(10+sups(-18)) cell()
+        cell(i(femto)) cell(10+sups(-15)) cell()
+        cell(i(pico))  cell(10+sups(-12)))
+    row(cell(i(nano))  cell(10+sups(-9)) cell()
+        cell(i(micro)) cell(10+sups(-6)) cell()
+        cell(i(milli)) cell(10+sups(-3)))
+    row(cell(i(centi)) cell(10+sups(-2)) cell()
+        cell(i(deci))  cell(10+sups(-1)))
+    rowline()
+    row(cell(i(deca))  cell(10+sups(1)) cell()
+        cell(i(hecto)) cell(10+sups(2)) cell()
+        cell(i(kilo))  cell(10+sups(3)))
+    row(cell(i(mega))  cell(10+sups(6)) cell()
+        cell(i(giga))  cell(10+sups(9)) cell()
+        cell(i(tera))  cell(10+sups(12)))
+    row(cell(i(peta))  cell(10+sups(15)) cell()
+        cell(i(exa))   cell(10+sups(18)))
+    rowline()
+    row(cell(i(zetta))   cell(10+sups(21)) cell()
+        cell(i(yotta))   cell(10+sups(24)))
+    rowline()
+    )
+    )
+ (em(note:) the definitions of the types tt(yocto, zepto, zetta) and tt(yotta)
+use integral constants exceeding 64 bits. Although these constants are defined
+in bf(C++), they are not available on 64 bit or smaller architectures.)

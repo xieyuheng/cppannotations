@@ -1,0 +1,53 @@
+The hi(namespace this_thread)hi(this_thread) tt(namespace std::this_thread)
+contains functions that are uniquely associated with the currently running
+thread.
+
+Before using the namespace tt(this_thread) the tthi(thread) header file must
+be included.
+
+Inside the tt(std::this_thread) namespace several free functions are defined,
+providing information about the current thread or that can be used to control
+its behavior:
+    itemization(
+    ithtq(get_id)(thread::id this_thread::get_id() noexcept)
+       (returns an object of type tt(thread::id) that identifies the currently
+active thread of execution. For an active thread the returned tt(id) is unique
+in the sense that it maps 1:1 to the currently active thread, and is not
+returned by any other thread. If a thread is currently not running
+hi(id)tt(thread::id()) is returned by the tt(std::thread) object's tt(get_id)
+member.)
+
+    ithtq(yield)(void yield() noexcept)
+        (when a thread calls tt(this_thread::yield()) the current thread is
+briefly suspended, allowing other (waiting) threads to start.)
+
+    ithtq(sleep_for)
+       (void sleep_for(chrono::duration<Rep, Period> const &relTime)
+            noexcept) 
+       (when a thread call tt(this_thread::sleep_for(...)) it is suspended for
+the amount of time that's specified in its argument. E.g.,
+   verb(
+std::this_thread::sleep_for(std::chrono::seconds(5));
+        )
+        )
+    ithtq(sleep_until)
+        (void sleep_until(chrono::time_point<Clock, Duration> const &absTime)
+            noexcept)
+       (when a thread calls this member it is suspended until the specified
+tt(absTime) is in the past. The next example has the same effect as the
+previous example:
+   verb(
+// assume using namespace std
+this_thread::sleep_until(chrono::system_clock().now() + chrono::seconds(5));
+        )
+    Conversely, the tt(sleep_until) call in the next example immediately
+returns:
+   verb(
+this_thread::sleep_until(chrono::system_clock().now() - chrono::seconds(5));
+        )
+        )
+    )
+
+
+
+

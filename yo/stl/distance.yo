@@ -1,0 +1,50 @@
+Earlier, in section ref(ITERATORS) it was stated that iterators support
+pointer arithmetic for containers storing their elements consecutively in
+memory. This is not completely true: to determine the number of elements
+between the elements to which two iterators refer the iterator must 
+support the subtraction operator.  
+
+Using pointer arithmetic to compute the number of elements between two
+iterators in, e.g., a tt(std::list) or tt(std::unordered_map) is not possible,
+as these containers do not store their elements consecutively in memory.
+
+The function tt(std::distance)hi(distance) fills in that little gap:
+tt(std::distance) expects two InputIterators and returns the number of
+elements between them.
+
+Before using tt(distance) the tthi(iterator) header file must be included.
+
+If the iterator specified as first argument exceeds the iterator specified as
+its second argument then the number of elements is non-positive, otherwise it
+is non-negative. If the number of elements cannot be determined (e.g., the
+iterators do not refer to elements in the same container), then tt(distance's)
+return value is undefined.
+
+Example:
+        verb(
+    #include <iostream>
+    #include <unordered_map>
+        
+    using namespace std;
+    
+    int main()
+    {
+        unordered_map<int, int> myMap = {{1, 2}, {3, 5}, {-8, 12}};
+    
+        cout << distance(++myMap.begin(), myMap.end()) << '\n'; // shows: 2
+    }
+        )
+
+The tt(iterator) header file also defines the function tt(std::size)hi(size),
+returning the number of elements in a containers (as returned by the
+container's tt(size) member) or of an array whose dimension is known to the
+compiler at the point of tt(std::size's) call. E.g., if the size of an array
+tt(data) is known to the compiler, then to call a function tt(handler)
+(expecting the address of the first element of an array and the address of the
+location just beyond that array) the following statement can be used:
+        verb(
+    handler(data, data + std::size(data));
+        )
+    As noted, the tt(std::size) function is defined in the tt(iterator)
+header. However, it's also guaranteed available when including the header file
+of a container supporting iterators (including the tt(string) header file).

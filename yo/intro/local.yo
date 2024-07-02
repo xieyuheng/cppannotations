@@ -1,0 +1,88 @@
+Although already available in the bf(C) programming language,
+    i(local variables) should only be defined once they're needed.  Although
+doing so requires a little getting used to, eventually it tends to produce
+more readable, maintainable and often more efficient code than defining
+variables at the beginning of compound statements. We suggest to apply the
+following rules hi(rule of thumb) of thumb when defining local variables:
+    itemization(
+    it() Local variables should be created at `intuitively right' places, such
+as in the example below. This does not only entail the tt(for)-statement, but
+also all situations where a variable is only needed, say, half-way through the
+function.
+    it() More in general, variables should be defined in such a way that their
+scope is as em(limited) and em(localized) as possible.  When avoidable local
+variables are not defined at the beginning of functions but rather where
+they're first used.
+    it() It is considered good practice to hi(global variable: avoid)
+    emi(avoid global variables). It is fairly easy to lose track of which
+global variable is used for what purpose. In bf(C++) global variables are
+seldom required, and by localizing variables the well known phenomenon of
+using the same variable for multiple purposes, thereby invalidating each
+individual purpose of the variable, can easily be prevented.
+    )
+
+    If considered appropriate, emi(nested blocks) can be used to localize
+auxiliary variables. However, situations exist where local variables are
+considered appropriate inside nested statements. The just mentioned tt(for)
+statement is of course a case in point, but local variables can also be
+defined within the condition clauses of tt(if-else) statements, within
+selection clauses of tt(switch) statements and condition clauses of tt(while)
+statements. Variables thus defined are available to the full
+statement, including its nested statements. For example, consider the
+following tt(switch) statement:
+        verbinclude(-a examples/switch.cc)
+    Note the location of the definition of the character `tt(c)': it is
+defined in the expression part of the tt(switch) statement. This implies
+that `tt(c)' is available em(only) to the tt(switch) statement itself,
+including its nested (sub)statements, but not outside the scope of the
+tt(switch).
+
+    The same approach can be used with tt(if) and tt(while) statements: a
+variable that is defined in the condition part of an tt(if) and tt(while)
+statement is available in their nested statements. There are some caveats,
+though:
+    itemization(
+    it() The variable definition must result in a variable which is
+initialized to a numeric or logical value;
+    it() The variable definition cannot be nested (e.g., using parentheses)
+within a more complex expression.
+    )
+    The latter point of attention should come as no big surprise: in order to
+be able to evaluate the logical condition of an tt(if) or tt(while) statement,
+the value of the variable must be interpretable as either zero (false) or
+non-zero (true). Usually this is no problem, but in bf(C++) em(objects) (like
+objects of the type tt(std::string) (cf. chapter ref(String))) are often
+returned by functions. Such objects may or may not be interpretable as numeric
+values. If not (as is the case with tt(std::string) objects), then such
+variables can em(not) be defined at the condition or expression clauses of
+condition- or repetition statements. The following example will therefore
+em(not) compile:
+        verb(
+    if (std::string myString = getString())     // assume getString returns
+    {                                           // a std::string value
+        // process myString
+    }
+        )
+
+ The above example requires additional clarification. Often a variable can
+profitably be given local scope, but an extra check is required immediately
+following its initialization. The initialization em(and) the test cannot
+em(both) be combined in one expression. Instead em(two) nested statements are
+required. Consequently, the following example won't compile either:
+        verb(
+    if ((int c = getchar()) && strchr("aeiou", c))
+        printf("Saw a vowel\n");
+        )
+    If such a situation occurs, either use two nested tt(if) statements, or
+localize the definition of tt(int c) using a nested compound statement:
+        verb(
+    if (int c = getchar())             // nested if-statements
+        if (strchr("aeiou", c))
+            printf("Saw a vowel\n");
+
+    {                                  // nested compound statement
+        int c = getchar();
+        if (c && strchr("aeiou", c))
+           printf("Saw a vowel\n");
+    }
+        )

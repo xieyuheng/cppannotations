@@ -1,0 +1,28 @@
+%filenames parser
+%scanner ../scanner/scanner.h
+
+%baseclass-preinclude      preinclude.h
+
+%stype   Semantic
+
+%token INT IDENTIFIER 
+
+%%
+
+rules:
+    rules rule
+|
+    rule
+;
+
+rule:
+    IDENTIFIER '(' IDENTIFIER ')' ';'
+    {
+          cout << $1 << " " << $3 << '\n';
+    }
+|
+    IDENTIFIER '=' INT ';'
+    {
+          cout << $1 << " " << $3 << '\n';
+    }
+;

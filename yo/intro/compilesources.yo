@@ -1,0 +1,25 @@
+Generally the following command can be used to compile a bf(C++) source file
+`tt(source.cc)':
+        verb(        g++ source.cc)
+    This produces a binary program (tt(a.out) or tt(a.exe)). If the default
+name is inappropriate, the name of the executable can be specified using the
+tt(-o) flag (here producing the program tt(source)):
+        verb(        g++ -o source source.cc)
+
+If a mere compilation is required, the compiled module can be produced using
+the tt(-c) flag:
+        verb(        g++ -c source.cc)
+    This generates the file tt(source.o), which can later on be linked to
+other modules. As pointed out, provide the i(compiler option) i(--std=c++14)
+to activate the features of the C++14 standard.
+
+bf(C++) programs quickly become too complex to maintain `by hand'. With all
+serious programming projects program maintenance tools are used. Usually the
+standard ti(make) program is used to maintain bf(C++) programs, but good
+alternatives exist, like  the hi(icmake)
+        turl(icmake)(https://fbb-git.github.io/icmake/)
+    or hi(ccbuild) turl(ccbuild)(https://github.com/bneijt/ccbuild/) program
+maintenance utilities.
+
+It is strongly advised to start using maintenance utilities early in the study
+of bf(C++).

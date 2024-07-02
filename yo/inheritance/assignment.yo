@@ -1,0 +1,21 @@
+Derived classes may also benefit from move assignment operations. If the
+derived class and its base class support swapping then the implementation is
+simple, following the standard shown earlier in section ref(MOVEASS). For the
+class tt(Car) this could boil down to:
+        verb(
+    Car &Car::operator=(Car &&tmp)
+    {
+        swap(tmp);
+        return *this;
+    }
+        )
+    If swapping is not supported then tt(std::move) can be used to call the
+base class's move assignment operator:
+        verb(
+    Car &Car::operator=(Car &&tmp)
+    {
+        static_cast<Land &>(*this) = std::move(tmp);
+        // move Car's own data members next
+        return *this;
+    }
+        )

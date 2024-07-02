@@ -1,0 +1,5 @@
+#include "calculatorcategory.h"
+
+#include <string>
+
+#include "../calculatorerror/calculatorerror.h"

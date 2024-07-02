@@ -1,0 +1,20 @@
+In addition to the class tt(unique_ptr) the class
+hi(shared_ptr)tt(std::shared_ptr<Type>) is available, which is a reference
+counting smart pointer.
+
+Before using tt(shared_ptrs) the tthi(memory) header file must be included.
+
+The shared pointer automatically destroys its contents once its reference
+count has decayed to zero. As with tt(unique_ptr), when defining a
+tt(shared_ptr<Base>) to store a newly allocated tt(Derived) class object, the
+returned tt(Base *) may be cast to a tt(Derived *) using a tt(static_cast):
+polymorphism isn't required, and when resetting the tt(shared_ptr) or when the
+tt(shared_ptr) goes out of scope, no slicing occurs, and tt(Derived)'s
+destructor (or, if configured: deleter) is called (cf. section
+ref(UNIQUEPTR)).
+
+tt(Shared_ptrs) support copy and move constructors as well as standard and
+move overloaded assignment operators.
+
+Like tt(unique_ptrs, shared_ptrs) may refer to dynamically allocated arrays.
+

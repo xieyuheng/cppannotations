@@ -1,0 +1,87 @@
+Since time plays an important role, not only in real life, but also in
+multi-threaded programs, we need clocks to represents and measure time.  
+bf(C++) offers several predefined emi(clock) types, and all these
+clocks are defined in the tt(std::chrono) namespace.
+
+Before using these clocks the tthi(chrono) header file must be included.
+
+A clock type must be specified when referring to a point in time using
+tt(std::chrono::time_point) (covered by the next section). It is also possible
+to define your own clock type (not covered by the annotations() (clause
+20.11.3 of the C++11 standard lists the requirements for a clock type)).
+
+If tt(Clock) is a predefined clock type, then tt(Clock) defines the following
+types:
+    itemization(
+    ithtq(duration)(std::chrono::Clock::duration)
+        (the tt(duration) type which 
+         used by tt(Clock) (e.g., tt(std::chrono::nanoseconds)))
+    ithtq(period)(std::chrono::Clock::period)
+        (the time period used by tt(Clock) (e.g.,
+         tt(std::ratio::nano))) 
+    ithtq(rep)(std::chrono::Clock::rep)
+        (defining the value type used by tt(Clock) to store duration
+         values (e.g., tt(int64_t)))
+    ithtq(time_point)(std::chrono::Clock::time_point)
+        (time points used by tt(Clock) 
+         (e.g., tt(std::chrono::time_point<system_clock, duration>)))
+    )
+
+In addition to these types predefined clocks offer a member
+    itemization(
+    ithtq(clock: now)(static std::chrono::time_point 
+                      std::chrono::Clock::now()) 
+       (returns the tt(time_point) representing the current time)
+    )
+
+There are three predefined clock types:
+    itemization(
+    ithtq(system_clock)(std::chrono::system_clock)
+       (the `wall clock' time, using the system's real time clock. 
+        In addition to tt(now) the class tt(system_clock)
+        offers these two static members:
+        itemization(
+        itht(system_clock::to_time_t)
+            (static std::time_t std::chrono::system_clock::to_time_t)
+                quote(tt((std::chrono::time_point const &
+                timePoint)))
+            quote(a tt(std::time_t)hi(time_t) value (the same type as returned
+by bf(C)'s bf(time)(2) function) as used by the representing the same point in
+time as tt(timePoint). Example:
+        verb(
+std::chrono::system_clock::to_time_t(
+                std::chrono::system_clock().now()
+             )
+        )
+            )
+
+        itht(system_clock::from_time_t)
+            (static std::chrono::time_point
+                std::chrono::system_clock::from_time_t)
+                quote(tt((std::time_t seconds)))
+            quote(a tt(time_point) value representing the same point in time
+                as tt(time_t).)
+        )
+        )
+
+    ithtq(steady_clock)(std::chrono::steady_clock) 
+       (a clock whose time increases in parallel with the increase of real
+        time.) 
+
+    ithtq(high_resolution_clock)(std::chrono::high_resolution_clock) 
+       (the computer's fastest clock (i.e., the clock having the shortest
+timer-tick period). In practice this is the same clock as  tt(system_clock).)  
+    )
+
+As an example: to access the current time you could use:
+        verb(
+    auto point = std::chrono::system_clock::now();
+        )
+
+
+
+
+
+
+
+

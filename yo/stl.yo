@@ -1,0 +1,212 @@
+includefile(stl/intro)
+
+lsect(PREDEFINED)(Predefined function objects)
+includefile(stl/predefined)
+
+    subsect(Arithmetic function objects)
+    includefile(stl/arithmetic)
+
+    lsubsect(RELATIONAL)(Relational function objects)
+    includefile(stl/relational)
+
+    subsect(Logical function objects)
+    includefile(stl/logical)
+
+    subsect(The `std::not_fn' negator)
+    includefile(stl/notfn)
+
+lsect(ITERATORS)(Iterators)
+includefile(stl/iterators)
+
+    lsubsect(DISTANCE)(std::distance and std::size)
+    includefile(stl/distance)
+
+    lsubsect(INSERTER)(Insert iterators)
+    includefile(stl/insertiterators)
+
+    lsubsect(ISTREAMITERATORS)(Iterators for `istream' objects)
+    includefile(stl/istreamiterators)
+
+        subsubsect(Iterators for `istreambuf' objects)
+        includefile(stl/istreambufiterators)
+
+    subsect(Iterators for `ostream' objects)
+    includefile(stl/ostreamiterators)
+
+        lsubsubsect(OSTREAMBUFITER)(Iterators for `ostreambuf' objects)
+        includefile(stl/ostreambufiterators)
+
+lsect(UNIQUEPTR)(The class 'unique_ptr')
+includefile(stl/uniqueptr)
+
+    subsect(Defining `unique_ptr' objects)
+    includefile(stl/defining)
+
+    lsubsect(UNIQUEPLAIN)(Creating a plain `unique_ptr')
+    includefile(stl/uniqueplain)
+
+    lsubsect(UNIQUEMOVE)(Moving  another `unique_ptr')
+    includefile(stl/uniquemove)
+
+    lsubsect(UNIQUENEW)(Pointing to a newly allocated object)
+    includefile(stl/uniquenew)
+
+    lsubsect(UNIQUEMEM)(Operators and members)
+    includefile(stl/uniquemembers)
+
+    subsect(Using `unique_ptr' objects for arrays)
+    includefile(stl/uniquearrays)
+
+lsect(SHAREDPTR)(The class `shared_ptr')
+includefile(stl/sharedptr)
+
+    subsect(Defining `shared_ptr' objects)
+    includefile(stl/definingshared)
+
+    lsubsect(SHAREDPLAIN)(Creating a plain `shared_ptr')
+    includefile(stl/sharedplain)
+
+    lsubsect(SHAREDNEW)(Pointing to a newly allocated object)
+    includefile(stl/sharednew)
+
+    lsubsect(SHAREDMEM)(Operators and members)
+    includefile(stl/sharedmembers)
+
+    lsubsect(SHAREDCAST)(Casting shared pointers)
+    includefile(stl/sharedcasts)
+
+    lsubsect(SHAREDARRAY)(Using `shared_ptr' objects for arrays)
+    includefile(stl/sharedarrays)
+
+sect(Smart smart pointer construction: `make_shared' and `make_unique')
+includefile(stl/makeshared)
+
+COMMENT(TODO: Weak Pointers)
+
+sect(Classes having pointer data members)
+includefile(stl/classeshavingpointers)
+
+sect(Regular Expressions)
+includefile(stl/regularexp)
+
+    subsect(The regular expression mini language)
+    includefile(stl/regexlanguage)
+
+        subsubsect(Character classes)
+        includefile(stl/charclass)
+
+    subsect(Defining regular expressions: std::regex)
+    includefile(stl/regex)
+
+    lsubsect(SMATCH)(Retrieving matches: std::match_results)
+    includefile(stl/smatch)
+
+    lsubsect(REGALG)(Regular expression matching functions)
+    includefile(stl/regalg)
+
+        subsubsect(The std::regex_constants::match_flag_type flags)
+        includefile(stl/matchflags)
+
+        lsubsubsect(REGMATCH)(Matching full texts: std::regex_match)
+        includefile(stl/regexmatch)
+
+        lsubsubsect(REGSRCH)(Partially matching text: std::regex_search)
+        includefile(stl/regexsearch)
+
+        lsubsubsect(FORMAT)(The member std::match:_results::format)
+        includefile(stl/format)
+
+        lsubsubsect(REGREP)(Modifying target strings: std::regex_replace)
+        includefile(stl/regexreplace)
+
+sect(Randomization and Statistical Distributions)
+includefile(stl/statdist)
+
+    subsect(Random Number Generators)
+    includefile(stl/randomnumber)
+
+    subsect(Statistical distributions)
+    includefile(stl/statistical)
+
+COMMENT(
+    class discrete_distribution
+    class piecewise_constant_distribution
+    class piecewise_linear_distribution
+END)
+
+        lsubsubsect(BERNOULLI)(Bernoulli distribution)
+        includefile(stl/bernoulli)
+
+        lsubsubsect(BINOMIAL)(Binomial distribution)
+        includefile(stl/binomial)
+
+        subsubsect(Cauchy distribution)
+        includefile(stl/cauchy)
+
+        lsubsubsect(CHISQUARED)(Chi-squared distribution)
+        includefile(stl/chisquared)
+
+        subsubsect(Extreme value distribution)
+        includefile(stl/extremevalue)
+
+        subsubsect(Exponential distribution)
+        includefile(stl/exponential)
+
+        subsubsect(Fisher F distribution)
+        includefile(stl/fisherf)
+
+        subsubsect(Gamma distribution)
+        includefile(stl/gamma)
+
+        subsubsect(Geometric distribution)
+        includefile(stl/geometric)
+
+        subsubsect(Log-normal distribution)
+        includefile(stl/lognormal)
+
+        subsubsect(Normal distribution)
+        includefile(stl/normal)
+
+        subsubsect(Negative binomial distribution)
+        includefile(stl/negativebinomial)
+
+        subsubsect(Poisson distribution)
+        includefile(stl/poisson)
+
+        subsubsect(Student t distribution)
+        includefile(stl/studentt)
+
+        subsubsect(Uniform int distribution)
+        includefile(stl/uniformint)
+
+        subsubsect(Uniform real distribution)
+        includefile(stl/uniformreal)
+
+        subsubsect(Weibull distribution)
+        includefile(stl/weibull)
+
+sect(The std::experimental/filesystem namespace)
+includefile(stl/filesystem/intro)
+
+    subsect(File system exceptions: filesystem_error)
+    includefile(stl/filesystem/filesystemerror)
+
+    subsect(Names of file system entries: path)
+    includefile(stl/filesystem/path)
+
+    subsect(Handling directories: directory_entry,
+            (recursive_)directory_iterator)
+    includefile(stl/filesystem/directoryentry)
+
+    subsect(Visiting directory entries: (recursive_)directory_iterator)
+    includefile(stl/filesystem/directoryiterator)
+
+    lsubsect(FSSTATUS)(Types (file_type) and permissions (perms) of file
+            system entries: file_status)
+    includefile(stl/filesystem/filestatus)
+
+    subsect(Information about the space of a file system entries: space_info)
+    includefile(stl/filesystem/spaceinfo)
+
+    lsubsect(FSFUN)(Free functions)
+    includefile(stl/filesystem/functions)

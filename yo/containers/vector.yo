@@ -1,0 +1,201 @@
+The ti(vector) class implements an 
+    hi(array: expandable)i(expandable array).  Before using the tt(vector)
+container the tthi(vector) header file must be included.
+
+    The following constructors, operators, and member functions are available:
+    itemization(
+    it() hi(vector constructors) Constructors:
+        itemization(
+        it() The copy and move constructors are available;
+        it() A tt(vector) may be constructed empty:
+        verb(
+vector<string> object;
+        )
+        it() A vector may be initialized to a certain number of elements:
+    verb(
+vector<string> object(5, string("Hello")); // initialize to 5 Hello's,
+vector<string> container(10);              // and to 10 empty strings
+vector<string> names = {"george", "frank", "tony", "karel"}; 
+        )
+        it() A vector may be initialized using iterators. To
+initialize a vector with elements 5 until 10 (including the last one) of an
+existing tt(vector<string>) the following construction may be used:
+    verb(
+extern vector<string> container;
+vector<string> object(&container[5], &container[11]);
+        )
+
+    Note here that the last element pointed to by the second iterator
+(tt(&container[11])) is em(not) stored in tt(object).  This is a simple
+example of the use of em(iterators), in which the used
+    i(range of values) starts at the first value, and includes all elements up
+to but not including the element to which the second iterator refers. The
+standard notation for this is rangeti(begin, end).
+        )
+    it() In addition to the standard operators for containers, the tt(vector)
+supports the index operator, which can be used to retrieve or reassign
+individual elements of the vector. Note that the elements which are indexed
+must exist. For example, having defined an empty vector a statement like
+tt(ivect[0] = 18) produces an error, as the vector is empty.  So, the vector
+is em(not) automatically
+ hi(automatic expansion) expanded, and tt(operator[]) does em(not) respect its
+ i(array bounds). In this case the vector should be resized first, or
+tt(ivect.push_back(18)) should be used (see below). If you need run-time array
+bound checking, use the vector's tt(at) member.
+    it() The tt(vector) class offers the following
+ hi(vector: member functions) member functions:
+        itemization(
+        ithtq(assign)(void assign(...))
+            (assigns new contents to the vector:)
+            itemization(
+            itt(assign(iterator begin, iterator end)) assigns the values at
+the iterator range rangett(begin, end) to the vector;
+            itt(assign(size_type n, value_type const &val)) assigns tt(n)
+copies of tt(val) to the vector;
+            itt(assign(initializer_list<value_type> values)) assigns the
+values in the initializer list to the vector.
+                )
+
+        ithtq(at)(Type &at(size_t idx))
+            (returns a reference to the vector's element at
+index position tt(idx). If tt(idx) exceeds the vector's size a
+tt(std::out_of_range) exception is thrown.)
+        ithtq(back)(Type &back())
+            (returns a reference to the last element in the
+vector. It is the i(responsibility of the programmer) to use the member only
+if the vector is not empty.)
+        ithtq(begin)(vector::iterator begin())
+            (returns an iterator pointing to the first
+element in the vector, returning tt(end) if the vector is empty.)
+        ithtq(capacity)(size_t capacity())
+            (Number of elements for which memory has been
+allocated. It returns at least the value returned by tt(size))
+        ithtq(cbegin)(vector::const_iterator cbegin())
+            (returns a const_iterator pointing to the first
+element in the vector, returning tt(cend) if the vector is empty.)
+        ithtq(cend)(vector::const_iterator cend())
+            (returns a const_iterator pointing just beyond the
+vector's last element.)
+        ithtq(clear)(void clear())
+            (erases all the vector's elements.)
+        ithtq(crbegin)(vector::const_reverse_iterator crbegin())
+            (returns a const_reverse_iterator pointing to the last
+element in the vector, returning tt(crend) if the vector is empty.)
+        ithtq(crend)(vector::const_reverse_iterator crend())
+            (returns a const_reverse_iterator pointing just before the
+vector's first element.)
+        ithtq(data)(value_type *data())
+            (returns a pointer to the vector's first data element.)
+        ithtq(emplace)
+                (iterator emplace(const_iterator position, Args &&...args))
+            (a tt(value_type) object is constructed from the arguments
+specified after tt(position), and the newly created element is inserted at
+tt(position). Different from tt(insert), which expects an existing object of
+the container's value type (and inserts 
+the provided argument into the container) using copy or move construction or
+assignment, tt(emplace) uses its arguments to 
+em(construct) such an object immediately at the intended location of the
+container, without requiring copy or move construction or assignment.)
+        ithtq(emplace_back)(void emplace_back(Args &&...args))
+            (a tt(value_type) object is constructed from the member's
+arguments, and the newly created element is inserted beyond the vector's last
+element.)
+        ithtq(empty)(bool empty())
+            (returns tt(true) if the vector contains no
+elements.)
+        ithtq(end)(vector::iterator end())
+            (returns an iterator pointing beyond the last
+element in the vector.)
+        ithtq(erase)(vector::iterator erase())
+            (erases a specific range of elements in the vector:)
+            itemization(
+            itt(erase(pos)) erases the element pointed to by the iterator
+tt(pos). The iterator tt(++pos) is returned.
+            itt(erase(first, beyond)) erases elements indicated by the iterator
+range rangett(first, beyond), returning tt(beyond).
+            )
+
+        ithtq(front)(Type &front())
+            (returns a reference to the first element in the
+vector. It is the responsibility of the programmer to use the member only if
+the vector is not empty.)
+        ithtq(get_allocator)(allocator_type get_allocator() const)(returns a
+copy of the allocator object used by the tt(vector) object.)
+        ithtq(insert)(... insert())
+            (elements may be inserted starting at a certain position. The
+return value depends on the version of tt(insert()) that is called:)
+            itemization(
+            itt(vector::iterator insert(pos)) inserts a default value of type
+tt(Type) at tt(pos), tt(pos) is returned.
+            itt(vector::iterator insert(pos, value)) inserts tt(value) at
+tt(pos), tt(pos) is returned.
+            itt(void insert(pos, first, beyond)) inserts the elements in the
+                iterator range rangett(first, beyond).
+            itt(void insert(pos, n, value)) inserts tt(n) elements having value
+tt(value) at position tt(pos).
+            )
+
+        ithtq(max_size)(size_t max_size())(returns the maximum number of
+elements this tt(vector) may contain.)
+        ithtq(pop_back)(void pop_back())
+            (removes the last element from the vector. With
+an i(empty vector) nothing happens.)
+        ithtq(push_back)(void push_back(value))
+            (adds tt(value) to the end of the vector.)
+        ithtq(rbegin)(vector::reverse_iterator rbegin())
+            (this member returns a reverse_iterator pointing to the last
+element in the vector.) 
+        ithtq(rend)(vector::reverse_iterator rend())
+            (returns an iterator pointing before the first element in the
+vector.) 
+        ithtq(reserve)(void reserve(size_t request))
+            (if tt(request) is less than or equal to tt(capacity), this
+call has no effect. Otherwise, it is a request to allocate additional
+memory. If the call is successful, then tt(capacity) returns a value of at
+least tt(request). Otherwise, tt(capacity) is unchanged. In either case,
+tt(size)'s return value won't change, until a function like tt(resize) is
+called, actually changing the number of accessible elements.)
+        ithtq(resize)(void resize())
+            (can be used to alter the number of elements that
+are currently stored in the vector:)
+            itemization(
+            itt(resize(n, value)) may be used to resize the vector to a size
+of tt(n). tt(Value) is optional. If the vector is expanded and tt(value) is
+not provided, the additional elements are initialized to the i(default value)
+of the used data type, otherwise tt(value) is used to initialize extra
+elements.
+            )
+
+        ithtq(shrink_to_fit)(void shrink_to_fit())(optionally reduces the
+amount of memory allocated by a vector to its current size. The
+implementor is free to ignore or otherwise optimize this request. In order to
+guarantee a `shrink to fit' operation the
+    verb(
+vector<Type>(vectorObject).swap(vectorObject)
+        ) 
+        idiom can be used.)
+        ithtq(size)(size_t size())
+            (returns the number of elements in the vector.)
+        ithtq(swap)(void swap())
+            (swaps two vectors using identical data types. Example:)
+    verb(
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main()
+{
+    vector<int> v1(7);
+    vector<int> v2(10);
+
+    v1.swap(v2);
+    cout << v1.size() << " " << v2.size() << '\n';
+}
+/*
+    Produced output:
+10 7
+*/
+        )
+        )
+    )
+

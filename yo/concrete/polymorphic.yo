@@ -1,0 +1,82 @@
+Instead of using unions to store various semantic values tt(bisonc++) could
+also use a polymorphic base class to handle semantic values of various
+types. Using a polymorphic base class is covered in this section. The
+described method is a direct result of a suggestion initially brought forward
+by Dallas A. Clement in September 2007.
+
+One may wonder why tt(union)s are still used by Bisonc++, as bf(C++) offers
+inherently superior ways to handle multiple semantic types: a poymorphic base
+class and a series of derived classes implementing the alternative data types.
+
+On the other hand, a polymorphic base class also seems to imply a lot of
+additional work: classes must be derived from a base class, virtual members
+must be declared and overridden in derived classes, and the base class must be
+aware of the relevant interfaces of all derived classes. All this does more to
+hinder than to promote the construction of reusable software. So, how to
+proceed? It turns out that the required effort to implement and use
+polymorphic semantic values is fairly small. In fact, only a very basic
+polymorphic semantic base class needs to be implemented. Having defined the
+polymorphic base class template meta programming techniques can be used to let
+the compiler create all derived classes we might need. The amount of works
+turns out to be astonishingly small. What about the `free lunch'? Well, the
+approach works fine in situations where we either can deduct the actual
+semantic value from the grammar (i.e., the syntax) itself, or where we
+occasionally are willing to use a switch to select the actual semantic
+value. This rather weak assumption holds true for the grammar used by the
+program developed in this section, so let's get on with it!
+
+The program developed in this section recognizes input consisting of lines
+suggesting assignment statements or function calls:
+        verb(
+    value:
+        int
+    |
+        ident
+    ;
+
+    arglist:
+        arglist ',' value
+    |
+        value
+    ;
+
+    rule:
+        ident '(' arglist ')' ';'
+    |
+        ident '=' int ';'
+    ;
+        )
+    An essential characteristic of these simple rules is that three different
+semantic value types are used: int-values, names, and vectors of
+arguments. Other types could easily be used as well: doubles, complex
+numbers, sets; you name it.
+
+    Our semantic value must accommodate all of these different types, and must
+also allow us to determine the actual type that's stored in a semantic value
+in cases where we cannot deduct the actual type merely from the syntax (which
+happens, e.g., for the various semantic value types that may be contained in
+an tt(arglist)).
+
+    In the following sections we'll develop the parser using a polymorphic
+base class to handle its semantic values. To prevent excessive copying of
+semantic values the parser's actual semantic value is not the semantic value
+itself but a tt(spSemBase), which is a wrapper around a
+tt(std::shared_ptr<SemBase>), where tt(SemBase) is our polymorphic base
+class (cf. section ref(SPSEMBASE)).
+
+    We'll develop the generic tt(Semantic) class template in steps:
+    itemization(
+    it() In the next section we'll start by defining em(tags) for the various
+semantic data types;
+    it() Next, support structs are developed allowing us to indicate whether
+semantic data can be modified by the parser or not;
+    it() Following this, a trait class is developed allowing us to obtain data
+types from tags;
+    it() Another trait class is needed to determine the data type that is
+returned by the conversion operators of the different semantic data types;
+    it() Hereafter the polymorphic base class tt(SemBase) is developed;
+    it() Finally, de class template tt(Semantic) is defined, allowing us to
+define various semantic value classes, all derived from tt(SemBase)
+    )
+    The complete demo program is available in the annotations()'s source
+archive under the directory tt(yo/concrete/poly2).

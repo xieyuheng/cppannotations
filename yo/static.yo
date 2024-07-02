@@ -1,0 +1,25 @@
+includefile(static/intro)
+
+    lsect(StaticData)(Static data)
+    includefile(static/data)
+
+        subsect(Private static data)
+        includefile(static/private)
+
+        subsect(Public static data)
+        includefile(static/public)
+
+        subsect(Initializing static const data)
+        includefile(static/const)
+
+        lsubsect(GENCONST)(Generalized constant expressions (constexpr))
+        includefile(static/genconst)
+
+            lsubsubsect(CONSTEXPR)(Constant expression data)
+            includefile(static/constexprdata)
+
+    sect(Static member functions)
+    includefile(static/function)
+
+        lsubsect(CALLINGCONVENTION)(Calling conventions)
+        includefile(static/calling)

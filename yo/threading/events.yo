@@ -1,0 +1,133 @@
+This section introduces em(condition variables). Condition variables allow
+programs to synchronize threads using the em(states) of data, rather than
+simply locking the em(access) to data (which is realized using mutexes).
+
+Before condition variables can be used the tthi(condition_variable) header
+file must be included.
+
+To start our discussion, consider a classic producer-consumer scenario: the
+producer generates items which are consumed by a consumer. The producer can
+only produce a certain number of items before its storage capacity has filled
+up and the client cannot consume more items than the producer has produced.
+
+At some point the producer's storage capacity has filled to the brim, and the
+producer has to wait until the client has at least consumed some items,
+thereby creating space in the producer's storage. Similarly, the consumer
+cannot start consuming until the producer has at least produced some items.
+
+Implementing this scenario only using mutexes (data locking) is not an
+attractive option, as merely using mutexes forces a program to implement the
+scenario using em(polling): processes must continuously (re)acquire the
+mutex's lock, determine whether they can perform some action, followed by the
+release of the lock. Often there's no action to perform, and the process is
+busy acquiring and releasing the mutex's lock. Polling forces threads to wait
+until they can lock the mutex, even though continuation might already be
+possible. The polling interval could be reduced, but that too isn't an
+attractive option, as that increases the overhead associated with handling the
+mutexes (also called `busy waiting').
+
+Condition variables can be used to prevent polling. Threads can use condition
+variables to em(notify) waiting threads that there is something for them to
+do. This way threads can synchronize on data values (em(states)).
+
+As data values may be modified by multiple threads, threads still need to use
+mutexes, but only for controlling access to the data.  In addition, condition
+variables allow threads to em(release) ownership of mutexes until a certain
+value has been obtained, until a preset amount of time has been passed, or
+until a preset point in time has been reached.
+
+The prototypical setup of threads using condition variables looks like this:
+    itemization(
+    it() consumer thread(s) act like this:
+        verb(
+    lock the mutex
+    while the required condition has not yet been attained (i.e., is false):
+        wait until being notified 
+         (this automatically releasing the mutex's lock).
+    once the mutex's lock has been reacquired, and the required condition
+    has been attained:
+        process the data
+    release the mutex's lock.
+        )
+    it() producer thread(s) act similarly:
+        verb(
+    lock the mutex
+    while the required condition has not yet been attained:
+        do something to attain the required condition
+    notify waiting threads (that the required condition has been attained)
+    release the mutex's lock.
+        )
+    ) 
+    No matter which thread starts, the thread holding the mutex's lock will at
+some point release the lock, allowing the other process to (re)acquire it. If
+the consumer starts it immediately releases the lock once it enters its
+waiting state; if the producer starts it releases the lock once the condition
+is true. 
+
+This protocol hides a subtle initial synchronization requirement. The consumer
+will miss the producer's notification if it (i.e., the consumer) hasn't yet
+entered its waiting state. So em(waiting (consumer) threads should start
+before notifying (producer) threads). Once threads have started, no
+assumptions can be made anymore about the order in which any of the condition
+variable's members (tt(notify_one, notify_all, wait, wait_for), and
+tt(wait_until)) are called.
+
+Condition variables come in two flavors: objects of the class 
+    hi(condition_variable)tt(std::condition_variable) are used in combination
+with objects of type tt(unique_lock<mutex>). Because of 
+optimizations which are available for this specific combination using 
+tt(condition_variables) is somewhat more efficient than using the more
+generally applicable class
+    hi(condition_variable_any)tt(std::condition_variable_any), which may be
+used with any (e.g., user supplied) lock type.
+
+Condition variable classes (covered in detail in the next two sections) offer
+members like tt(wait, wait_for, wait_until, notify_one) and tt(notify_all)
+that may concurrently be called.  The notifying members are always atomically
+executed. Execution of the tt(wait) members consists of three atomic parts:
+    itemization(
+    it() the mutex is released, and the thread is suspended until its
+        notification; 
+    it() Once the notification has been received, the lock is reacquired
+    it() The wait state ends (and processing continues beyond the tt(wait)
+        call). 
+    )
+    So, returning from tt(wait)-members the previously waiting thread 
+has reacquired the mutex's lock.
+
+In addition to the condition variable classes the following free function and
+tt(enum) type is provided:
+    itemization(
+    ithtq(notify_all_at_thread_exit)(void
+        std::notify_all_at_thread_exit(condition_variable &cond,
+        unique_lock<mutex> lockObject))
+       (once the current thread has ended, all other threads waiting on
+        tt(cond) are notified. It is good practice to exit the thread as
+        soon as possible after calling tt(notify_all_at_thread_exit).
+
+       Waiting threads must verify that the thread they were waiting for has
+        indeed ended. This is usually realized  by first obtaining the lock on
+        tt(lockObject), followed by verifying that the condition
+        they were waiting for is true and that the lock was not
+        reacquired before tt(notify_all_at_thread_exit) was called.)
+
+    ithtq(cv_status)(std::cv_status) 
+       (the tt(cv_status) enum is used by several member functions of the
+        condition variable classes (cf. sections ref(CONDVAR1) and
+        ref(CONDVAR2)): 
+       verb(
+namespace std
+{
+    enum class cv_status 
+    { 
+        no_timeout, 
+        timeout 
+    };
+}
+        )
+        )
+    )
+
+
+
+

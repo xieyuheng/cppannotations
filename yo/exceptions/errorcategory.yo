@@ -1,0 +1,74 @@
+Objects of classes derived from the base class tt(std::error_category)
+(cf. section ref(ERRCAT)) identify sources of groups of error codes. Usually
+new error categories are defined matching new error code enumerations.
+
+New tt(error_category) classes are derived from tt(std::error_category) which
+can then be used by tt(system_error) constructors.
+
+Error categories are designed as em(singletons): only one object of each class
+should exist. By using singletons the equality of tt(error_category) objects
+can simply be deduced from the equality of their addresses.
+
+tt(Error_category) classes provide several members. Most are declared
+em(virtual) (cf. chapter ref(POLYMORPHISM)), meaning that those members may be
+defined in error category classes we ourselves design (cf. section
+ref(ERRCODEENUM)). The following members are declared by
+tt(std::error_category):
+    itemization(
+    ithtq(name)(virtual char const *name() const noexcept) 
+       (This member tt(must) be defined by our own category classes. It
+        returns the name of the error category as NTBS (like tt(generic));)
+
+    ithtq(message)(virtual string message(int ev) const)
+       (This member tt(must) be defined by our own category classes. It
+        returns a string describing the error condition denoted by tt(ev);)
+
+    ithtq(default_error_condition)(virtual error_condition
+        default_error_condition(int ev) const noexcept)
+       (returns the tt(error_condition) corresponding to the error value
+        tt(ev) as defined in the current tt(error_category);)
+
+    ithtq(equivalent)
+       (virtual bool equivalent(int ev, error_condition const &condition)
+        const noexcept)
+       (returns tt(true) if error value tt(ev's) error condition is equal to
+        tt(condition);)
+
+    ittq(virtual bool equivalent(error_code const &code, int condition) const
+        noexcept)
+       (returns tt(true) if tt(code's) error category is equal to the current
+        category and tt(code's) error condition is equal to 
+        tt(condition);)
+
+    ittq(bool operator<(error_category const &rhs) const noexcept)
+       (returns tt(less<const error_category*>()(this, &rhs)).)
+
+    it() Error category objects may also be compared for (in)equality.
+    )
+
+    Functions returning predefined error categories:
+    itemization(
+    ithtq(generic_category)(error_category const &generic_category() noexcept)
+       (returns a reference to the em(generic) tt(error_category) object.
+        The returned object's tt(name) member returns a pointer to the string
+        tt("generic");)
+
+    ithtq(system_category)(error_category const &system_category() noexcept)
+       (returns a reference to the em(operating system) tt(error_category)
+        object: it is used for errors reported by the operating system. The
+        object's tt(name) member returns a pointer to the string
+        tt("system");)
+
+    ithtq(iostream_category)(error_category const &iostream_category() noexcept)
+       (returns a reference to the em(iostream) tt(error_category)
+        object: it is used for errors reported by stream objects. The
+        object's tt(name) member returns a pointer to the string
+        tt("iostream");)
+
+    ithtq(future_category)(error_category const &future_category() noexcept)
+       (returns a reference to the em(future) tt(error_category) object: it is
+        used for errors reported by `future' objects (cf. section
+        ref(FUTURE)). The object's tt(name) member returns a pointer to the
+        string tt("future");)
+    )
+

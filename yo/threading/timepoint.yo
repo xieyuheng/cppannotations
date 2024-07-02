@@ -1,0 +1,99 @@
+The class ti(time_point) is defined in the tt(std::chrono) namespace.
+Objects of the class tt(std::chrono::time_point) define a point in time.
+
+Before using the class tt(std::chrono::time_point) the tthi(chrono) header
+file must be included.
+
+The class tt(time_point) is a class template, requiring two template type
+arguments: a tt(Clock) type and a tt(Duration) type.  The tt(Clock) type
+usually is one of the predefined clock types, e.g.,
+tt(chrono::system_clock). The tt(Duration) type may be omitted, in which case
+the tt(Clock's duration) type is used. An explicit tt(duration) type may also
+be provided.
+
+In the previous section tt(auto) was used to specify the type of the return
+value of tt(system_clock::now). The explicit definition looks like this:
+    verb(
+    std::chrono::time_point<std::chrono::system_clock> now = 
+        std::chrono::system_clock::now();
+    )
+
+The class tt(std::chrono::time_point) features three constructors:
+    itemization(
+    ittq(time_point())
+       (the default constructor represents the beginning of the clock's
+        emi(epoch) (E.g., Jan, 1, 1970, 00:00h);)
+
+    ittq(time_point(time_point<Clock, Duration> const &timeStep))
+       (initializes a tt(time_point) object to represent a point in time
+tt(timeStep Duration) units beyond the clock's epoch;)
+
+    ittq(time_point(time_point<Clock, Duration2> const &timeStep))
+       (this constructor is defined as a member template, using the template
+header tt(template <typename Duration2>). The type tt(Duration2) is a
+tt(std::chrono::duration) (or comparable) type, using a possibly larger period
+for its unit than tt(time_point's Duration) type. It initializes a
+tt(time_point) object to represent a point in time tt(timeStep Duration2)
+units beyond the clock's epoch.)
+    )
+
+The class tt(std::chrono::time_point) has these operators and members:
+    itemization(
+    ittq(std::chrono::time_point &operator+=(Duration const &duration))
+       (this operator is also available as binary arithmetic 
+        operator,linebreak()
+        expecting a tt(std::chrono::time_point const &) and a tt(Duration
+        const &) argument (in any order).  The amount of time represented by
+        tt(duration) is added to the current tt(time_point) value. Example:
+       verb(
+    std::chrono::system_clock::now() + seconds(5);
+       )
+        )
+
+    ittq(std::chrono::time_point &operator-=(Duration const &duration))
+       (this operator is also available as binary arithmetic 
+        operator,linebreak()
+        expecting a tt(std::chrono::time_point const &) and a tt(Duration
+        const &) argument (in any order).  The amount of time represented by
+        tt(duration) is subtracted from the current tt(time_point)
+        value. Example:
+       verb(
+    auto point = std::chrono::system_clock::now();
+    point -= seconds(5);
+       )
+        )
+
+    ithtq(time_since_epoch)(constexpr Duration time_since_epoch() const)
+       (returns the object's tt(Duration) since the epoch.)
+
+    ithtq(min)(static constexpr time_point min())
+       (a static member returning the value returned by the time point's
+        tt(duration::min) value.)
+
+    ithtq(max)(static constexpr time_point max())
+       (a static member returning the value returned by the time point's
+        tt(duration::max) value.)
+    )
+
+All predefined clocks use nanoseconds as their time unit. To obtain the
+time expressed in a larger time unit, divide the value returned by the 
+tt(time_point's count) value by larger time unit 
+converted to nanoseconds. E.g., the number of hours passed since the beginning
+of the epoch is:
+        verb(
+    using namespace std;
+    using namespace chrono;     // for brevity
+
+    cout << system_clock::now().time_since_epoch().count() /
+            nanoseconds(hours(1)).count() << " hours since the epoch\n";
+        )
+
+
+
+
+
+
+
+
+
+

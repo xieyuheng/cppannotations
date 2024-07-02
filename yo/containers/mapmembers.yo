@@ -1,0 +1,145 @@
+The following member functions are available for the tt(map) container:
+    itemization(
+        ithtq(at)(mapped_type &at(key_type const &key))
+            (returns a reference to the map's tt(mapped_type)
+associated with tt(key). If the key is not stored in the tt(map) an
+tt(std::out_of_range) exception is thrown.)
+    ithtq(begin)(map::iterator begin())(returns an iterator pointing to the
+first element of the map. )
+        ithtq(cbegin)(map::const_iterator cbegin())
+            (returns a const_iterator pointing to the first
+element in the map, returning tt(cend) if the map is empty.)
+        ithtq(cend)(map::const_iterator cend())
+            (returns a const_iterator pointing just beyond the
+map's last element.)
+    ithtq(clear)(void clear())(erases all elements from
+the map.)
+    ithtq(count)(size_t count(key))(returns 1 if
+the provided key is available in the tt(map), otherwise 0 is returned.)
+    ithtq(crbegin)(map::reverse_iterator crbegin() const)(
+    reverse_iterator returns a reverse_iterator pointing to the last
+element of the map.)
+    ithtq(rend)(map::reverse_iterator crend())(returns an iterator pointing
+before the first element of the map.)
+        ithtq(emplace)
+                (pair<iterator, bool> emplace(Args &&...args))
+            (a tt(value_type) object is constructed from tt(emplace)'s
+arguments. If the tt(map) already contained an object using the same
+tt(key_type) value, then a tt(std::pair) is returned containing an iterator
+pointing to the object using the same tt(key_type) value and the value
+tt(false). If no such tt(key_type) value was found, the newly constructed
+object is inserted into the tt(map), and the returned tt(std::pair)
+contains an iterator pointing to the newly inserted inserted tt(value_type)
+as well as the value tt(true).)
+        ithtq(emplace_hint)(iterator emplace_hint(const_iterator position,
+                            Args &&...args))
+            (a tt(value_type) object is constructed from the member's
+arguments, and the newly created element is inserted into the
+tt(map), unless the (at tt(args)) provided key already exists. The
+implementation may or may not use tt(position) as a em(hint) to start looking
+for an insertion point. The returned tt(iterator) points to the tt(value_type)
+using the provided key. It may refer to an already existing tt(value_type) or
+to a newly added tt(value_type); an existing tt(value_type) is not
+replaced. If a new value em(was) added, then the container's size has been
+incremented when tt(emplace_hint) returns.)
+    ithtq(empty)(bool empty())(returns tt(true) if
+the map contains no elements.)
+    ithtq(end)(map::iterator end())(returns an iterator pointing beyond the
+last element of the map.)
+    ithtq(equal_range)
+            (pair<map::iterator, map::iterator> equal_range(key))(this
+member returns a pair of iterators, being respectively the return values of
+the member functions tt(lower_bound) and tt(upper_bound), introduced below.
+An example illustrating these member functions is given at the
+discussion of the member function tt(upper_bound).)
+    ithtq(erase)(... erase())(erases a specific element or range of elements
+from the map:)
+        itemization(
+        itt(bool erase(key)) erases the element having the
+given tt(key) from the tt(map). tt(True) is returned if the value was removed,
+tt(false) if the map did not contain an element using the given tt(key).
+        itt(void erase(pos)) erases the element pointed to by the iterator
+tt(pos).
+        itt(void erase(first, beyond)) erases all elements indicated by
+the iterator range rangett(first, beyond).
+        )
+
+    ithtq(find)(map::iterator find(key))(returns
+an iterator to the element having the given key. If the element isn't
+available, tt(end) is returned. The following example illustrates the use of
+the tt(find) member function:)
+        verbinclude(-a examples/mapfind.cc)
+        ithtq(get_allocator)(allocator_type get_allocator() const)(returns a
+copy of the allocator object used by the tt(map) object.)
+    ithtq(insert)(... insert())(inserts elements into the map. Values
+associated with already existing keys, however, are not replaced by new
+values. Its return value depends on the version of tt(insert) that is called:)
+        itemization(
+        itt(pair<map::iterator, bool> insert(keyvalue)) inserts
+a new tt(value_type) into the map. The return value is a
+ti(pair<map::iterator, bool>).  If the returned ti(bool) field is tt(true),
+tt(keyvalue) was inserted into the map. The value tt(false) indicates that the
+key that was specified in tt(keyvalue) was already available in the map, and
+so tt(keyvalue) was not inserted into the map.  In both cases the
+tt(map::iterator) field points to the data element having the
+tt(key) that was specified in tt(keyvalue). The use of this variant of
+tt(insert) is illustrated by the following example:
+        verbinclude(-a examples/mapinsert.cc)
+    Note the somewhat peculiar constructions like
+        verb(
+    cout << ret.first->first << " " << ret.first->second << ...
+        )
+    Note that `tt(ret)' is equal to the tt(pair) returned by the
+tt(insert) member function. Its `tt(first)' field is an iterator into the
+tt(map<string, int>), so it can be considered a pointer to a tt(map<string,
+int>::value_type). These value types themselves are pairs too, having
+`tt(first)' and `tt(second)' fields. Consequently, `tt(ret.first->first)' is
+the em(key) of the map value (a tt(string)), and `tt(ret.first->second)' is
+the em(value) (an tt(int)).
+        itt(map::iterator insert(pos, keyvalue)). This way a
+tt(map::value_type) may also be inserted into the map. tt(pos) is ignored, and
+an iterator to the inserted element is returned.
+        itt(void insert(first, beyond)) inserts the (tt(map::value_type))
+elements pointed to by the iterator range rangett(first, beyond).
+        )
+
+    ithtq(key_comp)(key_compare key_comp())
+       (returns a copy of the object used by the tt(map) to compare keys. The
+        type tt(map<KeyType, ValueType>::key_compare) is defined by the map
+        container and tt(key_compare)'s parameters have types tt(KeyType const
+        &). The comparison function returns tt(true) if the first key
+        argument should be ordered before the second key argument. To compare
+        keys em(and) values, use tt(value_comp), listed below.)
+    ithtq(lower_bound)
+            (map::iterator lower_bound(key))
+            (returns an iterator pointing to the first
+tt(keyvalue) element of which the tt(key) is at least equal to the specified
+tt(key).  If no such element exists, the function returns tt(end).)
+    ithtq(max_size)(size_t max_size())(returns the maximum number of
+elements this tt(map) may contain.)
+    ithtq(rbegin)(map::reverse_iterator rbegin())(
+    returns a reverse_iterator pointing to the last element of the map.)
+    ithtq(rend)(map::reverse_iterator rend())(returns an iterator pointing
+before the first element of the map.)
+    ithtq(size)(size_t size())(returns the
+number of elements in the map.)
+    ithtq(swap)(void swap(argument))(swaps two maps using identical key/value
+types.)
+    ithtq(upper_bound)
+            (map::iterator upper_bound(key))
+            (returns an iterator pointing to the first
+tt(keyvalue) element having a tt(key) exceeding the specified tt(key).  If no
+such element exists, the function returns tt(end).  The following
+example illustrates the member functions tt(equal_range), tt(lower_bound)
+and tt(upper_bound):
+        verbinclude(-a examples/mapbounds.cc)
+        )
+    ithtq(value_comp)(value_compare value_comp())
+       (returns a copy of the object used by the tt(map) to compare keys. The
+        type tt(map<KeyType, ValueType>::value_compare) is defined by the map
+        container and tt(value_compare)'s parameters have types tt(value_type
+        const &). The comparison function returns tt(true) if the first
+        key argument should be ordered before the second key argument. The
+        tt(Value_Type) elements of the tt(value_type) objects passed to this
+        member are not used by the returned function.)
+    )

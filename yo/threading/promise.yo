@@ -1,0 +1,182 @@
+In addition to tt(std::packaged_task) and tt(std::async) the class template
+    hi(promise)tt(std::promise) can be used to obtain the results from a
+separate thread.
+
+Before using the class template tt(promise) the tthi(future) header file
+must be included.
+
+A tt(promise) is useful to obtain the results from another thread without
+further synchronization requirements. Consider the following program:
+        verbinclude(-s4 //code examples/promise0.cc)
+Chances are that this program shows the value 0: the tt(cout) statement is
+already executed before the detached thread has had a chance to complete its
+work. In this example that problem can easily be solved by using a
+non-detached thread, and using the thread's tt(join) member, but when multiple
+threads are used that requires named threads and as many tt(join)
+calls. Instead, using a tt(promise) might be preferred:
+        verbinclude(-ns4 //code examples/promise1.cc)
+    In this example again a detached thread is used, but its results are kept
+for future reference in a tt(promise) object, instead of directly being
+assigned to a final destination variable. The tt(promise) object contains a
+tt(future) object holding the computed value. The tt(future's get) member
+blocks until the future has been made ready, at which point the result becomes
+available. By then the detached thread may or may not yet have been
+completed. If it already completed its work then tt(get) immediately returns,
+otherwise there will be a slight delay.
+
+    Promises can be useful when implementing a multi threaded version of some
+algorithm without having to use additional synchronization statements. As an
+example consider matrix multiplications.  Each element of the resulting
+product matrix is computed as the inner product of two vectors: the inner
+product of a row of the left-hand matrix operand and a column of the
+right-hand matrix operand becomes element tt([row][column]) of the resulting
+matrix. Since each element of the resulting matrix can independently be
+computed from the other elements, a multi threaded implementation is well
+possible. In the following example the function tt(innerProduct) (lines 4..11)
+leaves its result in a tt(promise) object:
+        verbinclude(-ns4 //code examples/promise2.cc)
+    Each inner product is computed by a separate (anonymous and detached)
+thread (lines 17..21), which starts as soon as the run-time system allows it
+to start. By the time the threads have finished the resulting inner products
+can be retrieved from the promises' futures. Since futures' tt(get) members
+block until their results are actually available, the resulting matrix can
+simply be displayed by calling those members in sequence (lines 23..28).
+
+    So, a tt(promise) allows us to use a thread to compute a value (or
+exception, see below), which value may then be collected by another thread at
+some future point in time. The promise remains available, and as a consequence
+further synchronization of the threads and the program starting the threads is
+not necessary. When the promise object contains an exception, rather than a
+value, its future's tt(get) member rethrows the stored exception.
+
+Here is the class tt(promise's) interface. Note that the class tt(promise) is
+a class template: its template type parameter tt(ReturnType) specifies the
+template type parameter of the tt(std::future) that can be retrieved from it.
+
+Constructors and destructor:
+    itemization(
+    ittq(promise())
+       (The default constructor constructs a tt(promise) object containing a
+        shared state. The shared state may be returned by the member
+        tt(get_future) (see below), but that future has not yet been made
+        ready;)
+
+    ittq(promise(promise &&tmp) noexcept)
+       (The move constructor constructs a tt(promise) object, transferring
+        the ownership of tt(tmp's) shared state to the newly constructed
+        object. After the object has been constructed, tt(tmp) no longer
+        contains a shared state;)
+
+    ittq(~promise())
+       (The object's shared state (if any) is abandoned;)
+    )
+
+Member functions:
+    itemization(
+    ittq(std::future<ReturnType> get_future())
+       (A tt(std::future) object sharing the current object's shared state is
+        returned. A tt(future_error) exception is thrown upon error,
+        containing 
+       itemization(
+       itt(future_already_retrieved) if tt(get_future) was already called on a
+            tt(packaged_task) object containing the same shared state as the
+            current object;
+        itt(no_state) if the current object has no shared state.
+       )
+       Note: Any tt(futures) that share the object's shared state may
+        access the result returned by the object's task;)
+
+    ittq(promise &operator=(promise &&rhs) noexcept)
+       (The move assignment operator first releases the current object's
+        shared state (if available), after which the current object and
+        tt(tmp) are swapped;)
+
+    ittq(void promise<void>::set_value())
+       (See below, at the last tt(set_value) member's description;)
+
+    ittq(void set_value(ReturnType &&value))
+       (See below, at the last tt(set_value) member's description;)
+
+    ittq(void set_value(ReturnType const &value))
+       (See the next member function's description;)
+
+    ittq(void set_value(ReturnType &value))
+       (The argument (tt(value)) is atomically stored in the shared state,
+        which is then also made ready. A tt(future_error) exception is thrown
+        upon error, containing
+       itemization(
+       itt(promise_already_satisfied) if the shared state has already been
+            made ready;
+        itt(no_state) if the current object does not have any shared state.
+       )
+       Alternatively, any exception thrown by tt(value)'s move or copy
+        constructor may be thrown;)
+    COMMENT(
+       When multiple threads use tt(set_value) and tt(set_exception) then
+        calls to set_value and set_exception on a single tt(promise) object
+        are serialized, and they synchronize and serialize with other
+        functions through the referred shared state. 
+
+        Not overly important? When multiple set_value calls occur then a
+        promise_already_satisfied is thrown.
+    END) 
+
+    ittq(void set_exception(std::exception_ptr obj))
+       (tt(Exception_ptr obj) (cf. section ref(EXCPTR)) is atomically stored
+        in the shared state, making that state ready. A tt(future_error)
+        exception is thrown upon error, containing
+       itemization(
+       itt(promise_already_satisfied) if the shared state has already been
+            made ready;
+        itt(no_state) if the current object does not have any shared state;
+       ))
+
+    ittq(void set_exception_at_thread_exit(exception_ptr ptr))
+       (The exception pointer tt(ptr) is stored in the shared state without
+        immediately making that state ready. The state becomes ready when the
+        current thread exits, once all objects of thread storage duration
+        which are associated with the ending thread have been destroyed.  A
+        tt(future_error) exception is thrown upon error, containing
+       itemization(
+       itt(promise_already_satisfied) if the shared state has already been
+            made ready;
+        itt(no_state) if the current object does not have any shared state;
+       ))
+
+
+    ittq(void set_value_at_thread_exit())
+       (See below, at the last tt(set_value_at_thread_exit) member's
+        description;)
+
+    ittq(void set_value_at_thread_exit(ReturnType &&value))
+       (See below, at the last tt(set_value_at_thread_exit) member's
+        description;)
+
+    ittq(void set_value_at_thread_exit(ReturnType const &value))
+       (See the next tt(set_value_at_thread_exit) member's
+        description;)
+
+    ittq(void set_value_at_thread_exit(ReturnType &value))
+       (Stores tt(value) in the shared state without immediately making that
+        state ready.  The state becomes ready when the current thread exits,
+        once all objects of thread storage duration which are associated with
+        the ending thread have been destroyed.  A tt(future_error) exception
+        is thrown upon error, containing
+       itemization(
+       itt(promise_already_satisfied) if the shared state has already been
+            made ready;
+        itt(no_state) if the current object does not have any shared state;
+       ))
+
+    ittq(void swap(promise& other) noexcept)
+       (The shared states (if any) of the current object and tt(other) are
+        exchanged.)
+    )
+
+The following non-member (free) function operating on tt(promise) objects is
+available:
+    itemization(
+    ittq(void swap(promise<ReturnType> &lhs, promise<ReturnType> &rhs)
+        noexcept) 
+       (Calls tt(lhs.swap(rhs)))
+    )
